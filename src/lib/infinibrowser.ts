@@ -12,26 +12,27 @@ type ICElementWithDepth = ICElement & {
 
 type Step = [ICElement, ICElement, ICElement];
 
-const findOptimalRecipe = (
+function findOptimalRecipe(
   recipes: ICElementRecipe[],
   t: Set<ICElement>,
   i: Set<ICElement>,
-) => {
+) {
   let lowestDepth = Infinity;
   let bestRecipe;
   let depth: number;
 
   if (recipes?.length) {
     for (const recipe of recipes) {
-      if (!t.has(recipe.a)) {
-        if (!t.has(recipe.b)) {
-          depth =
-            (i.has(recipe.a) ? 0 : recipe.a.depth) +
-            (i.has(recipe.b) || recipe.a == recipe.b ? 0 : recipe.b.depth);
-          if (depth < lowestDepth) {
-            lowestDepth = depth;
-            bestRecipe = recipe;
-          }
+      if (t.has(recipe.a)) continue;
+
+      if (!t.has(recipe.b)) {
+        depth =
+          (i.has(recipe.a) ? 0 : recipe.a.depth) +
+          (i.has(recipe.b) || recipe.a == recipe.b ? 0 : recipe.b.depth);
+
+        if (depth < lowestDepth) {
+          lowestDepth = depth;
+          bestRecipe = recipe;
         }
       }
     }
@@ -40,71 +41,65 @@ const findOptimalRecipe = (
       bestRecipe || (!t.has(recipes[0].a) && !t.has(recipes[0].b) && recipes[0])
     );
   }
-};
+}
 
 async function getLineageSteps(
   icElementOrElements: ICElement | ICElement[],
-  array__b: ICElementWithDepth[],
-  itemRecipes: ICElementRecipeWithDepth | null = null,
+  baseElements: ICElementWithDepth[],
 ): Promise<readonly [Step[], ICElementWithDepth[]]> {
   const icElements = Array.isArray(icElementOrElements)
     ? icElementOrElements
     : [icElementOrElements];
 
-  const set__n = new Set<ICElement>(array__b);
-  const set__a = new Set<ICElementWithDepth>();
+  const set__n = new Set<ICElement>(baseElements);
+  const missingSet = new Set<ICElementWithDepth>();
   const set__s = new Set<ICElement>();
   const recipes: Step[] = [];
-
-  if (icElements.length === 1 && itemRecipes) {
-    const xxx = icElements.pop()!;
-    set__n.add(xxx);
-    set__s.add(xxx);
-    recipes.push([itemRecipes.a, itemRecipes.b, xxx]);
-    if (!set__n.has(itemRecipes.a)) icElements.push(itemRecipes.a);
-    if (!set__n.has(itemRecipes.b)) icElements.push(itemRecipes.b);
-  }
 
   const icElementToRecipeMap = new Map<ICElement, ICElementRecipe>();
 
   while (icElements.length) {
-    const var_d = icElements.pop()!;
-    const c = icElementToRecipeMap.get(var_d);
+    const icElement = icElements.pop()!;
+    const recipe = icElementToRecipeMap.get(icElement);
 
-    if (!(!set__n.has(var_d) && c)) continue;
+    if (set__n.has(icElement)) continue;
 
-    set__n.delete(c[0]);
-    set__n.delete(c[1]);
+    if (recipe) {
+      set__n.delete(recipe[0]);
+      set__n.delete(recipe[1]);
+    }
 
-    const o = findOptimalRecipe(var_d.recipes, set__s, set__n);
+    const optimalRecipe = findOptimalRecipe(icElement.recipes, set__s, set__n);
 
-    if (o) {
-      if (set__n.has(o.a) && set__n.has(o.b)) {
-        recipes.push([o.a, o.b, var_d]);
-        set__s.delete(var_d);
-        set__n.add(var_d);
-      } else if (c) {
-        recipes.push([c.a, c.b, var_d]);
-        set__s.delete(var_d);
-        set__n.add(c.a);
-        set__n.add(c.b);
-        set__n.add(var_d);
+    if (optimalRecipe) {
+      if (set__n.has(optimalRecipe.a) && set__n.has(optimalRecipe.b)) {
+        recipes.push([optimalRecipe.a, optimalRecipe.b, icElement]);
+        set__s.delete(icElement);
+        set__n.add(icElement);
+      } else if (recipe) {
+        recipes.push([recipe.a, recipe.b, icElement]);
+        set__s.delete(icElement);
+        set__n.add(recipe.a);
+        set__n.add(recipe.b);
+        set__n.add(icElement);
       } else {
-        set__s.add(var_d);
-        icElements.push(var_d);
-        icElementToRecipeMap.set(var_d, o);
-        if (!set__n.has(o.b)) icElements.push(o.b);
-        if (!set__n.has(o.a)) icElements.push(o.a);
+        set__s.add(icElement);
+        icElements.push(icElement);
+        icElementToRecipeMap.set(icElement, optimalRecipe);
+        if (!set__n.has(optimalRecipe.b)) icElements.push(optimalRecipe.b);
+        if (!set__n.has(optimalRecipe.a)) icElements.push(optimalRecipe.a);
       }
     } else {
-      set__a.add(var_d);
-      set__s.delete(var_d);
-      set__n.add(var_d);
+      missingSet.add(icElement);
+      set__s.delete(icElement);
+      set__n.add(icElement);
       if (recipes.length % 500 === 0) await new Promise(setTimeout);
     }
   }
 
-  return [recipes, Array.from(set__a.keys())] as const;
+  const missing = [...missingSet];
+
+  return [recipes, missing] as const;
 }
 
 async function sortLineageSteps(
@@ -140,13 +135,15 @@ async function sortLineageSteps(
 async function calculateElementDepths(save: Savefile): Promise<void> {
   const saveElements = save.elements;
 
-  const array__b = saveElements.slice(0, 4);
+  const baseElements = saveElements.slice(0, 4);
   save.reverseRecipeMap.clear();
 
   await (async () => {
     let t = 0;
     for (const i of saveElements) i.depth = Infinity;
-    for (const n of array__b) n.depth = 0;
+
+    for (const n of baseElements) n.depth = 0;
+
     while (true) {
       let number__n = 0;
       t++;
@@ -172,23 +169,22 @@ async function calculateElementDepths(save: Savefile): Promise<void> {
 
 async function generateLineage(
   icElementOrElements: ICElement | ICElement[],
-  raw: Uint8Array<ArrayBuffer>,
-) {
-  const save = (await Savefile.decode(raw, {
-    generateReverseRecipeMap: false,
-  }))!;
-
+  save: Savefile,
+): Promise<{
+  readonly lineage: Step[];
+  readonly missing: ICElementWithDepth[];
+}> {
   calculateElementDepths(save);
 
   const saveElements = save.elements;
-  const array__b = saveElements.slice(0, 4);
+  const baseElements = saveElements.slice(0, 4) as ICElementWithDepth[];
 
   const [recipes, missing] = await getLineageSteps(
     icElementOrElements,
-    array__b,
+    baseElements,
   );
 
-  const lineage = await sortLineageSteps(recipes, [...missing], array__b);
+  const lineage = await sortLineageSteps(recipes, [...missing], baseElements);
 
   return { lineage, missing } as const;
 }
