@@ -184,16 +184,7 @@ async function generateLineage(
   return { lineage, missing } as const;
 }
 
-interface CalculateElementDepthsResult {
-  generateLineage(target: ICElement | ICElement[]): Promise<{
-    readonly lineage: Step[];
-    readonly missing: ICElementWithDepth[];
-  }>;
-}
-
-async function calculateElementDepths(
-  saveElements: ICElement[],
-): Promise<CalculateElementDepthsResult> {
+async function preCalculateElementDepths(saveElements: ICElement[]) {
   const elements = saveElements as ICElementWithDepth[];
   const baseElements = elements.slice(0, 4);
 
@@ -219,6 +210,21 @@ async function calculateElementDepths(
     await new Promise(setTimeout);
     if (!depthChanged) break;
   }
+
+  return { baseElements };
+}
+
+interface CalculateElementDepthsResult {
+  generateLineage(target: ICElement | ICElement[]): Promise<{
+    readonly lineage: Step[];
+    readonly missing: ICElementWithDepth[];
+  }>;
+}
+
+async function calculateElementDepths(
+  elements: ICElement[],
+): Promise<CalculateElementDepthsResult> {
+  const { baseElements } = await preCalculateElementDepths(elements);
 
   return {
     generateLineage(target: ICElement | ICElement[]) {

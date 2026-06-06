@@ -22,6 +22,7 @@
     "test": "bun test",
     "lint": "oxlint",
     "format": "oxfmt",
+    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling src",
     "build": "tsdown",
     "prepublishOnly": "bun run build"
   },
