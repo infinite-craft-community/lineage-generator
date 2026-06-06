@@ -67,49 +67,42 @@ async function getLineageSteps(
 
     if (achievedElementsSet.has(target)) continue;
 
-    if (targetRecipe) {
-      // console.log({ targetRecipe });
-      // achievedElementsSet.delete(targetRecipe[0]);
-      // achievedElementsSet.delete(targetRecipe[1]);
-      // achievedElementsSet.delete(targetRecipe.a);
-      // achievedElementsSet.delete(targetRecipe.b);
-    }
-
     const optimalRecipe = findOptimalRecipe(
       target.recipes,
       targetsSet,
       achievedElementsSet,
     );
 
-    if (optimalRecipe) {
-      if (
-        achievedElementsSet.has(optimalRecipe.a) &&
-        achievedElementsSet.has(optimalRecipe.b)
-      ) {
-        recipes.push([optimalRecipe.a, optimalRecipe.b, target]);
-        targetsSet.delete(target);
-        achievedElementsSet.add(target);
-      } else if (targetRecipe) {
-        recipes.push([targetRecipe.a, targetRecipe.b, target]);
-        targetsSet.delete(target);
-        achievedElementsSet.add(targetRecipe.a);
-        achievedElementsSet.add(targetRecipe.b);
-        achievedElementsSet.add(target);
-      } else {
-        targetsSet.add(target);
-        targets.push(target);
-        targetToRecipeMap.set(target, optimalRecipe);
-        if (!achievedElementsSet.has(optimalRecipe.b))
-          targets.push(optimalRecipe.b);
-        if (!achievedElementsSet.has(optimalRecipe.a))
-          targets.push(optimalRecipe.a);
-      }
-    } else {
+    if (!optimalRecipe) {
       missingElementsSet.add(target);
       targetsSet.delete(target);
       achievedElementsSet.add(target);
       // @ts-expect-error
       if (recipes.length % 500 === 0) await new Promise(setTimeout);
+      continue;
+    }
+
+    if (
+      achievedElementsSet.has(optimalRecipe.a) &&
+      achievedElementsSet.has(optimalRecipe.b)
+    ) {
+      recipes.push([optimalRecipe.a, optimalRecipe.b, target]);
+      targetsSet.delete(target);
+      achievedElementsSet.add(target);
+    } else if (targetRecipe) {
+      recipes.push([targetRecipe.a, targetRecipe.b, target]);
+      targetsSet.delete(target);
+      achievedElementsSet.add(targetRecipe.a);
+      achievedElementsSet.add(targetRecipe.b);
+      achievedElementsSet.add(target);
+    } else {
+      targetsSet.add(target);
+      targets.push(target);
+      targetToRecipeMap.set(target, optimalRecipe);
+      if (!achievedElementsSet.has(optimalRecipe.b))
+        targets.push(optimalRecipe.b);
+      if (!achievedElementsSet.has(optimalRecipe.a))
+        targets.push(optimalRecipe.a);
     }
   }
 
