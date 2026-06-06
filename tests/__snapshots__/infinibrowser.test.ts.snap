@@ -580,3 +580,39 @@ Aspirin + Wind = Sneeze
 Monocle + Sneeze = Inspector
 Calls + Inspector = Detective"
 `;
+
+exports[`generateLineage catstone-2026-06-06.ic savefile should generate a lineage for 'Plural' 2`] = `
+"Water + Water = Lake
+Lake + Water = Ocean
+Earth + Ocean = Island
+Island + Island = Continent
+Water + Wind = Wave
+Island + Wave = Surf
+Continent + Surf = Australia
+Earth + Earth = Mountain
+Mountain + Wind = Avalanche
+Avalanche + Wind = Snow
+Australia + Snow = No
+No + Ocean = Not
+Earth + Wind = Dust
+Fire + Water = Steam
+Fire + Steam = Engine
+Dust + Engine = Vacuum
+Vacuum + Vacuum = Black Hole
+Wind + Wind = Tornado
+Black Hole + Tornado = Singularity
+Not + Singularity = Plural"
+`;
+
+exports[`generateLineage catstone-2026-06-06.ic savefile should generate a lineage for 'Detective' 2`] = `
+"Water + Wind = Wave
+Earth + Wave = Sand
+Fire + Sand = Glass
+Fire + Glass = Lens
+Fire + Lens = Magnifying Glass
+Earth + Wind = Dust
+Dust + Fire = Ash
+Ash + Glass = Vase
+Magnifying Glass + Vase = Evidence
+Evidence + Magnifying Glass = Detective"
+`;

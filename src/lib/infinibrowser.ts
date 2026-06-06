@@ -10,7 +10,7 @@ type ICElementWithDepth = ICElement & {
   depth: number;
 };
 
-export type Step = [ICElement, ICElement, ICElement];
+export type Step = [ICElementWithDepth, ICElementWithDepth, ICElementWithDepth];
 
 function findOptimalRecipe(
   recipes: ICElementRecipeWithDepth[],
@@ -55,7 +55,7 @@ async function getLineageSteps(
   const set__s = new Set<ICElement>();
   const recipes: Step[] = [];
 
-  const targetToRecipeMap = new Map<ICElement, ICElementRecipe>();
+  const targetToRecipeMap = new Map<ICElement, ICElementRecipeWithDepth>();
 
   while (targets.length) {
     const target = targets.pop()!;
@@ -64,8 +64,9 @@ async function getLineageSteps(
     if (achievedElementsSet.has(target)) continue;
 
     if (targetRecipe) {
-      achievedElementsSet.delete(targetRecipe[0]);
-      achievedElementsSet.delete(targetRecipe[1]);
+      // console.log({ targetRecipe });
+      // achievedElementsSet.delete(targetRecipe.a);
+      // achievedElementsSet.delete(targetRecipe.b);
     }
 
     const optimalRecipe = findOptimalRecipe(
@@ -141,58 +142,65 @@ async function sortLineageSteps(
   return sortedSteps;
 }
 
-async function precalculateElementDepths(
-  saveElements: ICElement[],
-): Promise<{ baseElements: ICElementWithDepth[] }> {
-  const elements = saveElements as ICElementWithDepth[];
-  const baseElements = elements.slice(0, 4);
-
-  await (async () => {
-    for (const element of elements) element.depth = Infinity;
-
-    for (const baseElement of baseElements) baseElement.depth = 0;
-
-    while (true) {
-      let number__n = 0;
-      for (const element of elements) {
-        let minDepth = element.depth;
-        for (const recipe of element.recipes) {
-          const totalDepth = recipe.a.depth + recipe.b.depth + 1;
-          if (totalDepth < minDepth) {
-            minDepth = totalDepth;
-          }
-        }
-        if (element.depth > minDepth) {
-          element.depth = minDepth;
-          number__n++;
-        }
-      }
-      await new Promise(setTimeout);
-      if (!number__n) break;
-    }
-  })();
-
-  return { baseElements };
+interface GenerateLineageResult {
+  readonly lineage: Step[];
+  readonly missing: ICElementWithDepth[];
 }
 
 async function generateLineage(
-  target: ICElement | ICElement[],
-  elements: ICElement[],
-): Promise<{
-  readonly lineage: Step[];
-  readonly missing: ICElementWithDepth[];
-}> {
-  const { baseElements } = await precalculateElementDepths(elements);
-
-  const targets = (
-    Array.isArray(target) ? target : [target]
-  ) as ICElementWithDepth[];
-
+  targets: ICElementWithDepth[],
+  baseElements: ICElementWithDepth[],
+): Promise<GenerateLineageResult> {
   const [recipes, missing] = await getLineageSteps(targets, baseElements);
-
   const lineage = await sortLineageSteps(recipes, [...missing], baseElements);
 
   return { lineage, missing } as const;
 }
 
-export { precalculateElementDepths, generateLineage };
+interface CalculateElementDepthsResult {
+  generateLineage(target: ICElement | ICElement[]): Promise<{
+    readonly lineage: Step[];
+    readonly missing: ICElementWithDepth[];
+  }>;
+}
+
+async function calculateElementDepths(
+  saveElements: ICElement[],
+): Promise<CalculateElementDepthsResult> {
+  const elements = saveElements as ICElementWithDepth[];
+  const baseElements = elements.slice(0, 4);
+
+  for (const element of elements) element.depth = Infinity;
+  for (const baseElement of baseElements) baseElement.depth = 0;
+
+  while (true) {
+    let depthChanged = 0;
+    for (const element of elements) {
+      let minDepth = element.depth;
+      for (const recipe of element.recipes) {
+        const totalDepth = recipe.a.depth + recipe.b.depth + 1;
+        if (totalDepth < minDepth) {
+          minDepth = totalDepth;
+        }
+      }
+      if (element.depth > minDepth) {
+        element.depth = minDepth;
+        depthChanged++;
+      }
+    }
+    await new Promise(setTimeout);
+    if (!depthChanged) break;
+  }
+
+  return {
+    generateLineage(target: ICElement | ICElement[]) {
+      const targets = (
+        Array.isArray(target) ? target : [target]
+      ) as ICElementWithDepth[];
+
+      return generateLineage(targets, baseElements);
+    },
+  };
+}
+
+export { calculateElementDepths, generateLineage };

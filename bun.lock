@@ -4,10 +4,11 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "savefile.js": "0.0.2",
+        "savefile.js": "0.0.3",
       },
       "devDependencies": {
         "@gameroman/config": "0.1.0",
+        "@savefile/fixtures": "0.0.1",
         "@types/bun": "1.3.14",
         "oxfmt": "0.53.0",
         "oxlint": "1.68.0",
@@ -170,6 +171,8 @@
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.1", "", {}, "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="],
 
+    "@savefile/fixtures": ["@savefile/fixtures@0.0.1", "", {}, "sha512-GgfvEMsvw32Rm7U+OlusxVqVnTCYf9NlBS+o6EOyClEbnjO4ijBieQKWjtoeiMAKcj+g2yiHWYUdpBlPToOAeA=="],
+
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg=="],
 
     "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
@@ -228,7 +231,7 @@
 
     "rolldown-plugin-dts": ["rolldown-plugin-dts@0.25.2", "", { "dependencies": { "@babel/generator": "8.0.0-rc.6", "@babel/helper-validator-identifier": "8.0.0-rc.6", "@babel/parser": "8.0.0-rc.6", "ast-kit": "^3.0.0-beta.1", "birpc": "^4.0.0", "dts-resolver": "^3.0.0", "get-tsconfig": "5.0.0-beta.5", "obug": "^2.1.1" }, "peerDependencies": { "@ts-macro/tsc": "^0.3.6", "@typescript/native-preview": ">=7.0.0-dev.20260325.1", "rolldown": "^1.0.0", "typescript": "^5.0.0 || ^6.0.0", "vue-tsc": "~3.2.0" }, "optionalPeers": ["@ts-macro/tsc", "@typescript/native-preview", "typescript", "vue-tsc"] }, "sha512-nMhN/R+vmR8GM45ZW1FWMSjRTSDDn/6w4GTf8RNrEFCBdl8B1kySWrU1ixPtbwzXoRlcO+R/S88VgXuJQwfdDg=="],
 
-    "savefile.js": ["savefile.js@0.0.2", "", {}, "sha512-rkrehqC0ST4XpWHcgqkfkgHy7+YlsDI9vu2fsn12Mn1mQ2jSNxDsfKXRw4iGvcpJV7M8Fc3cgXjfGLQLZ3PaDQ=="],
+    "savefile.js": ["savefile.js@0.0.3", "", {}, "sha512-qO9/jYT09sMlGmbKn5HO+2aTmTcVl0yu0PqnvYDYTrTBzEGda8SQgw4X75uZRzhlhRtY1WKNejfDMK8ewo4FXw=="],
 
     "semver": ["semver@7.8.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-rkVq3IXh+4FDGch+KwzX3aV9W3kO54GyEgpvBzSyctDA6Xtd7RJQV1xmXbeQp5v7+VzLOfVqiutSE6GICgPFvg=="],
 
