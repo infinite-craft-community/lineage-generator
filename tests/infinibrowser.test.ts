@@ -28,7 +28,7 @@ describe("generateLineage", () => {
         savefile.elementNames.get("Detective")!,
       );
       expect(missing).toBeEmpty();
-      expect(lineage.length).toMatchInlineSnapshot(`299`);
+      expect(lineage.length).toMatchInlineSnapshot(`270`);
       expect(toLineageString(lineage)).toMatchSnapshot();
     });
   });
@@ -53,7 +53,7 @@ describe("generateLineage", () => {
         savefile.elementNames.get("Detective")!,
       );
       expect(missing).toBeEmpty();
-      expect(lineage.length).toMatchInlineSnapshot(`222`);
+      expect(lineage.length).toMatchInlineSnapshot(`193`);
       expect(toLineageString(lineage)).toMatchSnapshot();
     });
   });

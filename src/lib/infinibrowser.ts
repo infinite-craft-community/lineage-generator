@@ -14,7 +14,7 @@ export type Step = [ICElementWithDepth, ICElementWithDepth, ICElementWithDepth];
 
 function findOptimalRecipe(
   recipes: ICElementRecipeWithDepth[],
-  t: Set<ICElement>,
+  targetsSet: Set<ICElement>,
   achievedElementsSet: Set<ICElement>,
 ) {
   let lowestDepth = Infinity;
@@ -25,9 +25,9 @@ function findOptimalRecipe(
   if (!firstRecipe) return;
 
   for (const recipe of recipes) {
-    if (t.has(recipe.a)) continue;
+    if (targetsSet.has(recipe.a)) continue;
 
-    if (!t.has(recipe.b)) {
+    if (!targetsSet.has(recipe.b)) {
       const depth =
         (achievedElementsSet.has(recipe.a) ? 0 : recipe.a.depth) +
         (achievedElementsSet.has(recipe.b) || recipe.a == recipe.b
@@ -43,7 +43,11 @@ function findOptimalRecipe(
 
   if (bestRecipe) return bestRecipe;
 
-  return !t.has(firstRecipe.a) && !t.has(firstRecipe.b) && firstRecipe;
+  return (
+    !targetsSet.has(firstRecipe.a) &&
+    !targetsSet.has(firstRecipe.b) &&
+    firstRecipe
+  );
 }
 
 async function getLineageSteps(
@@ -52,7 +56,7 @@ async function getLineageSteps(
 ): Promise<readonly [Step[], ICElementWithDepth[]]> {
   const achievedElementsSet = new Set<ICElement>(baseElements);
   const missingElementsSet = new Set<ICElementWithDepth>();
-  const set__s = new Set<ICElement>();
+  const targetsSet = new Set<ICElement>();
   const recipes: Step[] = [];
 
   const targetToRecipeMap = new Map<ICElement, ICElementRecipeWithDepth>();
@@ -65,13 +69,15 @@ async function getLineageSteps(
 
     if (targetRecipe) {
       // console.log({ targetRecipe });
+      // achievedElementsSet.delete(targetRecipe[0]);
+      // achievedElementsSet.delete(targetRecipe[1]);
       // achievedElementsSet.delete(targetRecipe.a);
       // achievedElementsSet.delete(targetRecipe.b);
     }
 
     const optimalRecipe = findOptimalRecipe(
       target.recipes,
-      set__s,
+      targetsSet,
       achievedElementsSet,
     );
 
@@ -81,16 +87,16 @@ async function getLineageSteps(
         achievedElementsSet.has(optimalRecipe.b)
       ) {
         recipes.push([optimalRecipe.a, optimalRecipe.b, target]);
-        set__s.delete(target);
+        targetsSet.delete(target);
         achievedElementsSet.add(target);
       } else if (targetRecipe) {
         recipes.push([targetRecipe.a, targetRecipe.b, target]);
-        set__s.delete(target);
+        targetsSet.delete(target);
         achievedElementsSet.add(targetRecipe.a);
         achievedElementsSet.add(targetRecipe.b);
         achievedElementsSet.add(target);
       } else {
-        set__s.add(target);
+        targetsSet.add(target);
         targets.push(target);
         targetToRecipeMap.set(target, optimalRecipe);
         if (!achievedElementsSet.has(optimalRecipe.b))
@@ -100,8 +106,9 @@ async function getLineageSteps(
       }
     } else {
       missingElementsSet.add(target);
-      set__s.delete(target);
+      targetsSet.delete(target);
       achievedElementsSet.add(target);
+      // @ts-expect-error
       if (recipes.length % 500 === 0) await new Promise(setTimeout);
     }
   }
@@ -137,9 +144,32 @@ async function sortLineageSteps(
       elementsSet.add(r);
     }
 
+    // @ts-expect-error
     if (sortedSteps.length % 500 == 0) await new Promise(setTimeout);
   }
   return sortedSteps;
+}
+
+function pruneLineage(steps: Step[], targets: Set<ICElement>): void {
+  const elementToStepMap = new Map<ICElementWithDepth, Step>();
+
+  for (const step of steps) {
+    if (!targets.has(step[2])) {
+      elementToStepMap.set(step[2], step);
+    }
+    elementToStepMap.delete(step[0]);
+    elementToStepMap.delete(step[1]);
+  }
+
+  if (elementToStepMap.size) {
+    elementToStepMap.forEach((step) => {
+      const idx = steps.indexOf(step);
+      if (idx !== -1) {
+        steps.splice(idx, 1);
+      }
+    });
+    pruneLineage(steps, targets);
+  }
 }
 
 interface GenerateLineageResult {
@@ -151,8 +181,12 @@ async function generateLineage(
   targets: ICElementWithDepth[],
   baseElements: ICElementWithDepth[],
 ): Promise<GenerateLineageResult> {
+  const targetsSet = new Set<ICElement>(targets);
   const [recipes, missing] = await getLineageSteps(targets, baseElements);
+
   const lineage = await sortLineageSteps(recipes, [...missing], baseElements);
+
+  pruneLineage(lineage, targetsSet);
 
   return { lineage, missing } as const;
 }
@@ -188,6 +222,7 @@ async function calculateElementDepths(
         depthChanged++;
       }
     }
+    // @ts-expect-error
     await new Promise(setTimeout);
     if (!depthChanged) break;
   }
