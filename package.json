@@ -19,7 +19,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "bun test",
+    "test": "bun test --parallel=6",
     "lint": "oxlint",
     "format": "oxfmt",
     "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling src",
