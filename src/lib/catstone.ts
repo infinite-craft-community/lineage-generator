@@ -1,5 +1,3 @@
-"use strict";
-
 const o = {
   baseElementsString: ["Water", "Fire", "Wind", "Earth"],
   baseElementsId: null, // gets updated in `reloadGameData`
@@ -85,7 +83,7 @@ const defaultPresets = [
   },
 ];
 
-unsafeWindow.addEventListener("load", () => {
+window.addEventListener("load", () => {
   const v_container = document.querySelector(".container").__vue__;
   const addAPI = v_container.addAPI;
   v_container.addAPI = function () {
@@ -116,8 +114,8 @@ unsafeWindow.addEventListener("load", () => {
   }
 
   // add helper recipeModal stuff
-  if (unsafeWindow?.ICHelper?.recipeModalTabs)
-    unsafeWindow.ICHelper.recipeModalTabs.set("lineages", {
+  if (window?.ICHelper?.recipeModalTabs)
+    window.ICHelper.recipeModalTabs.set("lineages", {
       renderBody: helperRenderBody,
       renderFooter: helperRenderFooter,
     });
@@ -154,7 +152,7 @@ unsafeWindow.addEventListener("load", () => {
   };
 
   // this event listener was added before helpers listener, so it also registers stuff earlier MUhaHAHAHAHA
-  unsafeWindow.addEventListener(
+  window.addEventListener(
     "contextmenu",
     (e) => {
       if (!e.target || !e.target.closest) return;
@@ -182,7 +180,7 @@ function reloadGameData() {
   o.elementTextToId = new Map();
 
   console.time("Load Data");
-  const ICItems = unsafeWindow.IC.getItems();
+  const ICItems = window.IC.getItems();
   for (const element of ICItems) {
     addElement(element.text, element.id);
   }
@@ -348,7 +346,7 @@ function findBestRecipeHeur(recipesArr, heurMap = o.elementHeur) {
   return bestRecipe;
 }
 
-async function generateLineage(goals, recalc = false, depth = 0) {
+async function generateLineage(goals, recalc: false | number = false) {
   const elementQueue = [...goals];
   const crafted = new Set();
   const visitedLastPath = new Map(); // for invalid lineages with infinite loops
@@ -427,7 +425,7 @@ function removeUnnecessary(lineage, goals) {
   }
 
   for (let i = lineage.length - 1; i >= 0; i--) {
-    const [f, s, r] = lineage[i];
+    const [, , r] = lineage[i];
     if (goals.includes(r)) continue;
     // try to remove recipe step by rerouting other recipes
 
@@ -595,7 +593,7 @@ async function helperRenderBody(container, item) {
         optCopy.style.color = "gold";
         setTimeout(() => (optCopy.style.color = ""), 500);
       })
-      .catch((err) => alert("Failed to copy goals."));
+      .catch(() => alert("Failed to copy goals."));
   });
 
   // Option 2: Paste Goals
@@ -606,7 +604,7 @@ async function helperRenderBody(container, item) {
     try {
       const text = await navigator.clipboard.readText();
       if (text) processNewGoalElements(text.split("\n"));
-    } catch (err) {
+    } catch {
       alert(
         "Failed to read clipboard text. Please ensure clipboard permissions are granted.",
       );
@@ -618,7 +616,7 @@ async function helperRenderBody(container, item) {
   optRandom.classList.add("lineage-dropdown-item");
   optRandom.textContent = "Add random goal";
   optRandom.addEventListener("click", () => {
-    const items = unsafeWindow.IC.getItems();
+    const items = window.IC.getItems();
     if (items.length > 0) {
       const randomItem = items[Math.floor(Math.random() * items.length)];
       processNewGoalElements([randomItem.text]);
@@ -769,7 +767,7 @@ async function helperRenderBody(container, item) {
           copyLineageButton.style.borderColor = "";
         }, 500);
       })
-      .catch((err) => alert("Failed to copy lineage."));
+      .catch(() => alert("Failed to copy lineage."));
   });
 
   const optimiseButton = document.createElement("button");
@@ -850,7 +848,7 @@ async function helperRenderBody(container, item) {
 
     goals.forEach((goalId, index) => {
       const goalItem = idToMostlyNealCase(goalId);
-      const goalElement = unsafeWindow.ICHelper.createItemElement(goalItem);
+      const goalElement = window.ICHelper.createItemElement(goalItem);
       goalElement.classList.add("lineage-goal");
 
       goalElement.dataset.goalId = goalId; // Store goalId for easy access
@@ -884,7 +882,6 @@ async function helperRenderBody(container, item) {
       });
       goalElement.addEventListener("drop", (e) => {
         e.preventDefault();
-        const draggedGoalId = e.dataTransfer.getData("text/plain");
         const sourceIndex = parseInt(e.dataTransfer.getData("sourceIndex"), 10);
         const targetIndex = index;
 
@@ -928,7 +925,7 @@ async function helperRenderBody(container, item) {
       for (const missingElement of missingElements) {
         const missingItem = idToMostlyNealCase(missingElement);
         const missingItemElement =
-          unsafeWindow.ICHelper.createItemElement(missingItem);
+          window.ICHelper.createItemElement(missingItem);
         missingItemElement.classList.add("lineage-missing");
         missingContaierDiv.append(missingItemElement);
       }
@@ -943,7 +940,7 @@ async function helperRenderBody(container, item) {
       const recipe = document.createElement("div");
       recipe.classList.add("recipe");
       const [first, second, result] = r.map((x) =>
-        unsafeWindow.ICHelper.idMap.get(x),
+        window.ICHelper.idMap.get(x),
       );
       if (!first || !second || !result)
         console.warn(
@@ -955,11 +952,9 @@ async function helperRenderBody(container, item) {
         stepNumberSpan.classList.add("recipe-step-number");
         stepNumberSpan.textContent = `${step + 1}.`;
 
-        const firstItemElement = unsafeWindow.ICHelper.createItemElement(first);
-        const secondItemElement =
-          unsafeWindow.ICHelper.createItemElement(second);
-        const resultItemElement =
-          unsafeWindow.ICHelper.createItemElement(result);
+        const firstItemElement = window.ICHelper.createItemElement(first);
+        const secondItemElement = window.ICHelper.createItemElement(second);
+        const resultItemElement = window.ICHelper.createItemElement(result);
         if (missingElements.includes(icCaseId(first.id)))
           firstItemElement.classList.add("lineage-missing");
         if (missingElements.includes(icCaseId(second.id)))
@@ -993,11 +988,11 @@ async function helperRenderBody(container, item) {
 }
 
 function idToMostlyNealCase(itemId) {
-  let item = unsafeWindow.ICHelper.idMap.get(itemId);
+  let item = window.ICHelper.idMap.get(itemId);
   if (item) return item;
   // example: it is `End Of Sentence` but the user only has `End of Sentence`...
   const itemLowerText = o.elementIdToText[itemId].toLowerCase();
-  return unsafeWindow.IC.getItems().find(
+  return window.IC.getItems().find(
     (x) => x.text.toLowerCase() === itemLowerText,
   );
 }
@@ -1072,7 +1067,7 @@ function alertOnMissingRecipes(input, alertPopup) {
       "%cMissing:",
       "background: orange; color: white",
       missing.size > 0
-        ? `\n` + [...missing].join`\n`
+        ? `\n` + [...missing].join(`\n`)
         : "No missing recipes, yay!",
     );
     return [...missing];

@@ -1,4 +1,4 @@
-import { Savefile, type ICElement, type ICElementRecipe } from "savefile.js";
+import type { ICElement, ICElementRecipe } from "savefile.js";
 
 type ICElementRecipeWithDepth = ICElementRecipe & {
   a: ICElementWithDepth;
@@ -10,7 +10,7 @@ type ICElementWithDepth = ICElement & {
   depth: number;
 };
 
-type Step = [ICElement, ICElement, ICElement];
+export type Step = [ICElement, ICElement, ICElement];
 
 function findOptimalRecipe(
   recipes: ICElementRecipe[],
@@ -21,26 +21,26 @@ function findOptimalRecipe(
   let bestRecipe;
   let depth: number;
 
-  if (recipes?.length) {
-    for (const recipe of recipes) {
-      if (t.has(recipe.a)) continue;
+  if (!recipes?.length) return;
 
-      if (!t.has(recipe.b)) {
-        depth =
-          (i.has(recipe.a) ? 0 : recipe.a.depth) +
-          (i.has(recipe.b) || recipe.a == recipe.b ? 0 : recipe.b.depth);
+  for (const recipe of recipes) {
+    if (t.has(recipe.a)) continue;
 
-        if (depth < lowestDepth) {
-          lowestDepth = depth;
-          bestRecipe = recipe;
-        }
+    if (!t.has(recipe.b)) {
+      depth =
+        (i.has(recipe.a) ? 0 : recipe.a.depth) +
+        (i.has(recipe.b) || recipe.a == recipe.b ? 0 : recipe.b.depth);
+
+      if (depth < lowestDepth) {
+        lowestDepth = depth;
+        bestRecipe = recipe;
       }
     }
-
-    return (
-      bestRecipe || (!t.has(recipes[0].a) && !t.has(recipes[0].b) && recipes[0])
-    );
   }
+
+  return (
+    bestRecipe || (!t.has(recipes[0].a) && !t.has(recipes[0].b) && recipes[0])
+  );
 }
 
 async function getLineageSteps(
@@ -103,20 +103,20 @@ async function getLineageSteps(
 }
 
 async function sortLineageSteps(
-  e: Step[],
+  steps: Step[],
   missing_elements: ICElementWithDepth[],
-  array__b: ICElementWithDepth[],
+  elements: ICElementWithDepth[],
 ): Promise<Step[]> {
-  const set__i = new Set(array__b);
-  const set__n = new Set(e);
-  const steps: Step[] = [];
-  for (; set__n.size; ) {
+  const elementsSet = new Set(elements);
+  const stepsSet = new Set(steps);
+  const sortedSteps: Step[] = [];
+  for (; stepsSet.size; ) {
     let e = 0;
-    for (const step of set__n) {
-      if (set__i.has(step[0]) && set__i.has(step[1])) {
-        steps.push(step);
-        set__n.delete(step);
-        set__i.add(step[2]);
+    for (const step of stepsSet) {
+      if (elementsSet.has(step[0]) && elementsSet.has(step[1])) {
+        sortedSteps.push(step);
+        stepsSet.delete(step);
+        elementsSet.add(step[2]);
         e++;
       }
     }
@@ -125,59 +125,55 @@ async function sortLineageSteps(
       if (!missing_elements.length) break;
       const r = missing_elements.reduce((e, t) => (t.depth < e.depth ? t : e));
       missing_elements.splice(missing_elements.indexOf(r), 1);
-      set__i.add(r);
+      elementsSet.add(r);
     }
-    if (steps.length % 500 == 0) await new Promise(setTimeout);
+    if (sortedSteps.length % 500 == 0) await new Promise(setTimeout);
   }
-  return steps;
+  return sortedSteps;
 }
 
-async function calculateElementDepths(save: Savefile): Promise<void> {
-  const saveElements = save.elements;
-
-  const baseElements = saveElements.slice(0, 4);
-  save.reverseRecipeMap.clear();
+async function precalculateElementDepths(
+  saveElements: ICElement[],
+): Promise<{ baseElements: ICElementWithDepth[] }> {
+  const elements = saveElements as ICElementWithDepth[];
+  const baseElements = elements.slice(0, 4);
 
   await (async () => {
-    let t = 0;
-    for (const i of saveElements) i.depth = Infinity;
+    for (const element of elements) element.depth = Infinity;
 
-    for (const n of baseElements) n.depth = 0;
+    for (const baseElement of baseElements) baseElement.depth = 0;
 
     while (true) {
       let number__n = 0;
-      t++;
-      for (const a of saveElements) {
-        let e = a.depth;
-        let t;
-        let i;
-        for (i of a.recipes) {
-          t = i.a.depth + i.b.depth + 1;
-          if (t < e) {
-            e = t;
+      for (const element of elements) {
+        let minDepth = element.depth;
+        for (const recipe of element.recipes) {
+          const totalDepth = recipe.a.depth + recipe.b.depth + 1;
+          if (totalDepth < minDepth) {
+            minDepth = totalDepth;
           }
         }
-        if (a.depth > e) {
-          a.depth = e;
+        if (element.depth > minDepth) {
+          element.depth = minDepth;
           number__n++;
         }
       }
-      if ((await new Promise(setTimeout), !number__n)) break;
+      await new Promise(setTimeout);
+      if (!number__n) break;
     }
   })();
+
+  return { baseElements };
 }
 
 async function generateLineage(
   icElementOrElements: ICElement | ICElement[],
-  save: Savefile,
+  saveElements: ICElement[],
 ): Promise<{
   readonly lineage: Step[];
   readonly missing: ICElementWithDepth[];
 }> {
-  calculateElementDepths(save);
-
-  const saveElements = save.elements;
-  const baseElements = saveElements.slice(0, 4) as ICElementWithDepth[];
+  const { baseElements } = await precalculateElementDepths(saveElements);
 
   const [recipes, missing] = await getLineageSteps(
     icElementOrElements,
@@ -189,4 +185,4 @@ async function generateLineage(
   return { lineage, missing } as const;
 }
 
-export { generateLineage };
+export { precalculateElementDepths, generateLineage };
