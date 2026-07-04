@@ -1090,6 +1090,7 @@ async function verifyLineage(input, delayMs = 30) {
     if (owned.has(r)) err.push(`${r} was already crafted...`);
     else if (ownedIC.has(icCaseText(r)))
       err.push(`${r} was already crafted in different caps...`);
+
     (owned.add(r), ownedIC.add(icCaseText(r)));
 
     if (delayMs)
