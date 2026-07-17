@@ -27,7 +27,7 @@
     "prepublishOnly": "bun run build"
   },
   "dependencies": {
-    "savefile.js": "0.0.6"
+    "savefile.js": "0.1.0"
   },
   "devDependencies": {
     "@gameroman/config": "0.2.5",
