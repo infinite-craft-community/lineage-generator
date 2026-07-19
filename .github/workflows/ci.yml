@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Build and Test
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +28,8 @@ jobs:
       - name: Install dependencies
         run: bun ci
 
-      - name: Run tests
-        run: bun run test
-
       - name: Build
         run: bun run build
+
+      - name: Run tests
+        run: bun run test
