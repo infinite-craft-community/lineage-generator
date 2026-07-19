@@ -19,7 +19,6 @@ const lineage = {
   vars: o,
   icCaseText,
   icCaseId,
-  verify: verifyLineage,
   missing: alertOnMissingRecipes,
   toArray: textLineageToArray,
   toString: textArrayLineageToString,
@@ -976,11 +975,6 @@ async function helperRenderBody(container, item) {
       }
     });
   }
-  function getPresets() {
-    return JSON.parse(
-      GM_getValue("lineage_seed_presets", JSON.stringify(defaultPresets)),
-    );
-  }
   function updateHeaderStatText() {
     lineageTitle.textContent = `${methodName} - ${lineage.length} Steps (${((performance.now() - startTime) / 1000).toFixed(3)} s)`;
   }
@@ -1072,54 +1066,6 @@ function alertOnMissingRecipes(input, alertPopup) {
     );
     return [...missing];
   }
-}
-
-async function verifyLineage(input, delayMs = 30) {
-  alertOnMissingRecipes(input);
-
-  let owned = new Set(o.baseElementsString),
-    ownedIC = new Set([...owned].map((x) => icCaseText(x))),
-    err = [],
-    promises = [];
-
-  textLineageToArray(input).forEach(([f, s, r], i) => {
-    [f, s].forEach((x) => {
-      if (!ownedIC.has(icCaseText(x))) err.push(`${x} was never crafted...`);
-      else if (!owned.has(x)) err.push(`${x} was crafted in different caps...`);
-    });
-    if (owned.has(r)) err.push(`${r} was already crafted...`);
-    else if (ownedIC.has(icCaseText(r)))
-      err.push(`${r} was already crafted in different caps...`);
-
-    (owned.add(r), ownedIC.add(icCaseText(r)));
-
-    if (delayMs)
-      promises.push(
-        (async () => {
-          await sleep(i * delayMs);
-          try {
-            if (
-              !(await fetch(
-                `https://neal.fun/api/infinite-craft/check?first=${encodeURIComponent(icCaseText(f))}&second=${encodeURIComponent(icCaseText(s))}&result=${encodeURIComponent(r)}`,
-              )
-                .then((x) => x.json())
-                .then((x) => x.valid))
-            )
-              err.push(`Invalid recipe: ${f} + ${s} = ${r}`);
-          } catch (error) {
-            err.push(`Error checking recipe (${f} + ${s} = ${r}): ${error}`);
-          }
-        })(),
-      );
-  });
-  Promise.all(promises).then(() =>
-    console.log(
-      "%cVerify:",
-      "background: purple; color: white",
-      err.length > 0 ? err.join`\n` : "No Errors, yay!",
-    ),
-  );
-  return err;
 }
 
 async function consoleMakeLineage(...goals) {
