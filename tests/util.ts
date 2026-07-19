@@ -1,4 +1,4 @@
-import type { Step } from "#lib/infinibrowser";
+import type { Step } from "#lib/infinibrowser/shared";
 
 function stepToString(step: Step) {
   return `${step[0].text} + ${step[1].text} = ${step[2].text}`;
