@@ -22,7 +22,7 @@
     "test": "bun test --parallel=6",
     "lint": "oxlint",
     "format": "oxfmt",
-    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling src",
+    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling/profilings profiling/index.ts",
     "build": "tsdown",
     "prepublishOnly": "bun run build"
   },
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@gameroman/config": "0.2.5",
+    "@infinite-craft/dom-types": "0.0.4",
     "@savefile/fixtures": "0.0.1",
     "@types/bun": "1.3.14",
     "oxfmt": "0.59.0",

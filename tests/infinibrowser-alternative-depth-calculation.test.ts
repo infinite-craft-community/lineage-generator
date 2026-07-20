@@ -49,6 +49,27 @@ describe("generateLineage", () => {
       expect(lineage.length).toMatchInlineSnapshot(`63`);
       expect(toLineageString(lineage)).toMatchSnapshot();
     });
+
+    it("should generate a lineage for multiple targets: Plural + Soul", async () => {
+      const { lineage, missing } = await generateLineage([
+        savefile.elementNames.get("Plural")!,
+        savefile.elementNames.get("Soul")!,
+      ]);
+      expect(missing).toBeEmpty();
+      expect(lineage.length).toMatchInlineSnapshot(`68`);
+      expect(toLineageString(lineage)).toMatchSnapshot();
+    });
+
+    it("should generate a lineage for multiple targets: Plural + Detective + Acronym", async () => {
+      const { lineage, missing } = await generateLineage([
+        savefile.elementNames.get("Plural")!,
+        savefile.elementNames.get("Detective")!,
+        savefile.elementNames.get("Acronym")!,
+      ]);
+      expect(missing).toBeEmpty();
+      expect(lineage.length).toMatchInlineSnapshot(`321`);
+      expect(toLineageString(lineage)).toMatchSnapshot();
+    });
   });
 
   describe("2025-04-04.ic savefile", async () => {
@@ -92,6 +113,27 @@ describe("generateLineage", () => {
       expect(lineage.length).toMatchInlineSnapshot(`66`);
       expect(toLineageString(lineage)).toMatchSnapshot();
     });
+
+    it("should generate a lineage for multiple targets: Plural + Soul", async () => {
+      const { lineage, missing } = await generateLineage([
+        savefile.elementNames.get("Plural")!,
+        savefile.elementNames.get("Soul")!,
+      ]);
+      expect(missing).toBeEmpty();
+      expect(lineage.length).toMatchInlineSnapshot(`71`);
+      expect(toLineageString(lineage)).toMatchSnapshot();
+    });
+
+    it("should generate a lineage for multiple targets: Plural + Detective + Acronym", async () => {
+      const { lineage, missing } = await generateLineage([
+        savefile.elementNames.get("Plural")!,
+        savefile.elementNames.get("Detective")!,
+        savefile.elementNames.get("Acronym")!,
+      ]);
+      expect(missing).toBeEmpty();
+      expect(lineage.length).toMatchInlineSnapshot(`206`);
+      expect(toLineageString(lineage)).toMatchSnapshot();
+    });
   });
 
   describe("catstone-2026-06-06.ic savefile", async () => {
@@ -133,6 +175,27 @@ describe("generateLineage", () => {
       );
       expect(missing).toBeEmpty();
       expect(lineage.length).toMatchInlineSnapshot(`19`);
+      expect(toLineageString(lineage)).toMatchSnapshot();
+    });
+
+    it("should generate a lineage for multiple targets: Plural + Soul", async () => {
+      const { lineage, missing } = await generateLineage([
+        savefile.elementNames.get("Plural")!,
+        savefile.elementNames.get("Soul")!,
+      ]);
+      expect(missing).toBeEmpty();
+      expect(lineage.length).toMatchInlineSnapshot(`35`);
+      expect(toLineageString(lineage)).toMatchSnapshot();
+    });
+
+    it("should generate a lineage for multiple targets: Plural + Detective + Acronym", async () => {
+      const { lineage, missing } = await generateLineage([
+        savefile.elementNames.get("Plural")!,
+        savefile.elementNames.get("Detective")!,
+        savefile.elementNames.get("Acronym")!,
+      ]);
+      expect(missing).toBeEmpty();
+      expect(lineage.length).toMatchInlineSnapshot(`43`);
       expect(toLineageString(lineage)).toMatchSnapshot();
     });
   });
