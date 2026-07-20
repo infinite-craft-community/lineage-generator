@@ -124,7 +124,7 @@ async function sortLineageSteps(
   const elementsSet = new Set(elements);
   const stepsSet = new Set(steps);
   const sortedSteps: Step[] = [];
-  for (; stepsSet.size; ) {
+  for (; stepsSet.size;) {
     let e = 0;
     for (const step of stepsSet) {
       if (elementsSet.has(step[0]) && elementsSet.has(step[1])) {
