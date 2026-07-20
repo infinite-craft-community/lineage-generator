@@ -1,6 +1,7 @@
 import type { ICItemData } from "@infinite-craft/dom-types";
+import type { ICElement } from "savefile.js";
 
-const o = {
+const state = {
   baseElementsString: ["Water", "Fire", "Wind", "Earth"] as const,
   baseElementsId: null, // gets updated in `loadElements`
 
@@ -13,26 +14,6 @@ const o = {
   icCasedLookup: [],
   elementIdToText: [], // 1 => "Fire"
   elementTextToId: new Map<string, number>(), // "Fire" => 1
-};
-
-const lineage = {
-  refresh: loadElements,
-  make: consoleMakeLineage,
-  vars: o,
-  icCaseText,
-  icCaseId,
-  missing: alertOnMissingRecipes,
-  toArray: textLineageToArray,
-  toString: textArrayLineageToString,
-  idLineageToText,
-  idToMostlyNealCase,
-  internal: {
-    findBestRecipeHeur,
-    generateElementHeuristics,
-    generateLineage,
-    removeUnnecessary,
-    correctlyCapsAndOrderLineage,
-  },
 };
 
 const alphabet = [
@@ -139,11 +120,11 @@ window.addEventListener("load", () => {
         icCaseId(response.instance.id),
       ];
       const newHeurForR =
-        (o.elementHeur[newRecipe[0]] ?? Infinity) +
-        (o.elementHeur[newRecipe[1]] ?? Infinity) +
+        (state.elementHeur[newRecipe[0]] ?? Infinity) +
+        (state.elementHeur[newRecipe[1]] ?? Infinity) +
         1;
-      if ((o.elementHeur[newRecipe[2]] ?? Infinity) > newHeurForR) {
-        o.elementHeur[newRecipe[2]] = newHeurForR;
+      if ((state.elementHeur[newRecipe[2]] ?? Infinity) > newHeurForR) {
+        state.elementHeur[newRecipe[2]] = newHeurForR;
         // Now, propagate this change:
         generateElementHeuristics([newRecipe[2]]);
       }
@@ -171,8 +152,8 @@ window.addEventListener("load", () => {
 });
 
 function addElement(text: string, id: number): void {
-  o.elementIdToText[id] = text;
-  o.elementTextToId.set(text, id);
+  state.elementIdToText[id] = text;
+  state.elementTextToId.set(text, id);
 }
 
 function addRecipe(first: number, second: number, result: number): void {
@@ -189,11 +170,11 @@ function addRecipe(first: number, second: number, result: number): void {
 
   const sortedFS = S > F ? [F, S] : [S, F];
   const combString = sortedFS.join("=");
-  o.recipesIngIC.set(combString, result);
+  state.recipesIngIC.set(combString, result);
 
-  pushToArrayArray(o.recipesResIC, R, sortedFS);
-  pushToArrayArray(o.recipesUsesIC, F, [S, R]);
-  if (F !== S) pushToArrayArray(o.recipesUsesIC, S, [F, R]);
+  pushToArrayArray(state.recipesResIC, R, sortedFS);
+  pushToArrayArray(state.recipesUsesIC, F, [S, R]);
+  if (F !== S) pushToArrayArray(state.recipesUsesIC, S, [F, R]);
 }
 function pushToArrayArray(arr, key, value) {
   let a = arr[key];
@@ -219,19 +200,19 @@ function icCaseText(inputText: string) {
   return resultText;
 }
 function icCaseId(inputId: number): number {
-  const mapOutput = o.icCasedLookup[inputId];
+  const mapOutput = state.icCasedLookup[inputId];
   if (mapOutput !== undefined) return mapOutput;
 
-  const inputText = o.elementIdToText[inputId];
+  const inputText = state.elementIdToText[inputId];
   const resultText = icCaseText(inputText);
 
-  let resultId = o.elementTextToId.get(resultText);
+  let resultId = state.elementTextToId.get(resultText);
   if (resultId === undefined) {
     // example: it is `End Of Sentence` but the user only has `End of Sentence`...
-    resultId = o.nonExistentIcCaseId++;
+    resultId = state.nonExistentIcCaseId++;
     addElement(resultText, resultId);
   }
-  o.icCasedLookup[inputId] = resultId;
+  state.icCasedLookup[inputId] = resultId;
   return resultId;
 }
 
@@ -266,7 +247,7 @@ async function* generateLineageMultipleMethods(goals) {
 
 function generateElementHeuristics(
   startElements,
-  heurMap = o.elementHeur,
+  heurMap = state.elementHeur,
   end = Infinity,
 ) {
   const pq = new PriorityQueue((a, b) => b[0] > a[0]);
@@ -282,7 +263,7 @@ function generateElementHeuristics(
     const [elementHeur, element] = pq.pop();
     if ((heurMap[element] ?? Infinity) < elementHeur) continue;
 
-    for (const [other, result] of o.recipesUsesIC[element] ?? []) {
+    for (const [other, result] of state.recipesUsesIC[element] ?? []) {
       const otherHeur = element === other ? 0 : heurMap[other];
       if (otherHeur === undefined) continue;
 
@@ -298,7 +279,7 @@ function generateElementHeuristics(
   }
 }
 
-function findBestRecipeHeur(recipesArr, heurMap = o.elementHeur) {
+function findBestRecipeHeur(recipesArr, heurMap = state.elementHeur) {
   let bestMax = Infinity,
     bestMin = Infinity,
     bestRecipe = recipesArr[0];
@@ -323,14 +304,14 @@ async function generateLineage(goals, recalc: false | number = false) {
   const elementQueue = [...goals];
   const crafted = new Set();
   const visitedLastPath = new Map(); // for invalid lineages with infinite loops
-  const heurMap = [...o.elementHeur];
+  const heurMap = [...state.elementHeur];
   const lineage = [];
 
   while (elementQueue.length > 0) {
     const element = elementQueue.pop();
     if (crafted.has(element)) continue;
 
-    const elementRecipesArr = o.recipesResIC[element];
+    const elementRecipesArr = state.recipesResIC[element];
     if (elementRecipesArr === undefined) {
       // no recipe found, add as missing
       crafted.add(element);
@@ -348,7 +329,7 @@ async function generateLineage(goals, recalc: false | number = false) {
 
     let neededIng;
     for (const ing of bestRecipe) {
-      if (!o.baseElementsId.includes(ing) && !crafted.has(ing)) {
+      if (!state.baseElementsId.includes(ing) && !crafted.has(ing)) {
         neededIng = ing;
         break;
       }
@@ -393,8 +374,8 @@ function removeUnnecessary(lineage, goals) {
   );
   const usedMap = new Map(lineage.map((recipe) => [recipe[2], new Set()]));
   for (const [f, s, r] of lineage) {
-    if (!o.baseElementsId.includes(f)) usedMap.get(f)?.add(r);
-    if (!o.baseElementsId.includes(s)) usedMap.get(s)?.add(r);
+    if (!state.baseElementsId.includes(f)) usedMap.get(f)?.add(r);
+    if (!state.baseElementsId.includes(s)) usedMap.get(s)?.add(r);
   }
 
   for (let i = lineage.length - 1; i >= 0; i--) {
@@ -407,11 +388,11 @@ function removeUnnecessary(lineage, goals) {
 
     let removeable = true;
     for (const use of usedMap.get(r)) {
-      const replacementRecipe = o.recipesResIC[use].find(
+      const replacementRecipe = state.recipesResIC[use].find(
         ([newF, newS]) =>
-          (o.baseElementsId.includes(newF) ||
+          (state.baseElementsId.includes(newF) ||
             (resultIngMap.has(newF) && !blacklist.has(newF))) &&
-          (o.baseElementsId.includes(newS) ||
+          (state.baseElementsId.includes(newS) ||
             (resultIngMap.has(newS) && !blacklist.has(newS))),
       );
       if (replacementRecipe) changes.push([use, replacementRecipe]);
@@ -445,16 +426,17 @@ function getBlacklistRU(element, usedMap) {
   }
   return blacklist;
 }
+
 function switchRecipeRU(result, newRecipe, resultIngMap, usedMap) {
   const originalRecipe = resultIngMap.get(result);
   for (const x of originalRecipe)
-    if (!o.baseElementsId.includes(x)) usedMap.get(x)?.delete(result);
+    if (!state.baseElementsId.includes(x)) usedMap.get(x)?.delete(result);
 
   if (!newRecipe) resultIngMap.delete(result);
   else {
     resultIngMap.set(result, newRecipe);
     for (const x of newRecipe)
-      if (!o.baseElementsId.includes(x)) usedMap.get(x).add(result);
+      if (!state.baseElementsId.includes(x)) usedMap.get(x).add(result);
   }
 }
 
@@ -480,21 +462,24 @@ function correctlyCapsAndOrderLineage(lineage, goals) {
     }
     let neededIngs = [];
     for (const ing of recipe) {
-      if (!o.baseElementsId.includes(ing) && !crafted.has(ing)) {
+      if (!state.baseElementsId.includes(ing) && !crafted.has(ing)) {
         neededIngs.push(ing);
       }
     }
     if (neededIngs.length === 0) {
       crafted.add(element);
 
-      const actualResult = o.recipesIngIC.get(
+      const actualResult = state.recipesIngIC.get(
         [recipe[0], recipe[1]].sort((a, b) => a - b).join("="),
       );
       capsMap.set(element, actualResult);
       const newRecipe = [recipe[0], recipe[1], element].map(
         (x) => capsMap.get(x) ?? x,
       );
-      if (o.elementIdToText[newRecipe[0]] > o.elementIdToText[newRecipe[1]]) {
+      if (
+        state.elementIdToText[newRecipe[0]] >
+        state.elementIdToText[newRecipe[1]]
+      ) {
         [newRecipe[0], newRecipe[1]] = [newRecipe[1], newRecipe[0]];
       }
       newLineage.push(newRecipe);
@@ -508,7 +493,7 @@ function helperRenderFooter(container, item) {
 }
 
 async function helperRenderBody(container, item) {
-  const goalId = icCaseId(o.elementTextToId.get(item.text));
+  const goalId = icCaseId(state.elementTextToId.get(item.text));
   if (goalId === undefined) {
     container.appendChild(
       document.createTextNode(`${item.text} is not in your save...`),
@@ -601,8 +586,8 @@ async function helperRenderBody(container, item) {
   optWorstElement.classList.add("lineage-dropdown-item");
   optWorstElement.textContent = "Add worst element";
   optWorstElement.addEventListener("click", () => {
-    const maxHeurId = o.elementHeur.reduce(
-      (m, n, i) => (n > (o.elementHeur[m] ?? -Infinity) ? i : m),
+    const maxHeurId = state.elementHeur.reduce(
+      (m, n, i) => (n > (state.elementHeur[m] ?? -Infinity) ? i : m),
       -1,
     );
     const maxHeurItem = idToMostlyNealCase(maxHeurId);
@@ -802,7 +787,7 @@ async function helperRenderBody(container, item) {
     let update = false;
     for (const newGoal of newGoals) {
       const icGoalText = icCaseText(newGoal.trim());
-      const newItemId = o.elementTextToId.get(icGoalText);
+      const newItemId = state.elementTextToId.get(icGoalText);
       if (newItemId !== undefined && !goals.includes(newItemId)) {
         addGoalInput.value = "";
         goals.push(newItemId);
@@ -917,7 +902,7 @@ async function helperRenderBody(container, item) {
       );
       if (!first || !second || !result)
         console.warn(
-          "Invalid recipe for " + r.map((x) => o.elementIdToText[x]),
+          "Invalid recipe for " + r.map((x) => state.elementIdToText[x]),
           r,
         );
       else {
@@ -959,7 +944,7 @@ function idToMostlyNealCase(itemId) {
   let item = window.ICHelper.idMap.get(itemId);
   if (item) return item;
   // example: it is `End Of Sentence` but the user only has `End of Sentence`...
-  const itemLowerText = o.elementIdToText[itemId].toLowerCase();
+  const itemLowerText = state.elementIdToText[itemId].toLowerCase();
   return window.IC.getItems().find(
     (x) => x.text.toLowerCase() === itemLowerText,
   );
@@ -1004,10 +989,10 @@ function idLineageToText(lineage, goals) {
   return lineage
     .map((recipe, i) => {
       const [first, second] = [
-        o.elementIdToText[recipe[0]],
-        o.elementIdToText[recipe[1]],
+        state.elementIdToText[recipe[0]],
+        state.elementIdToText[recipe[1]],
       ].sort();
-      const result = o.elementIdToText[recipe[2]];
+      const result = state.elementIdToText[recipe[2]];
       return (
         `${first} + ${second} = ${result}` +
         (goals.includes(icCaseId(recipe[2])) ? `  // ${i + 1}` : "")
@@ -1019,12 +1004,12 @@ function idLineageToText(lineage, goals) {
 function alertOnMissingRecipes(input, alertPopup) {
   let missing = new Set();
   for (const [first, second, res] of textLineageToArray(input)) {
-    const id1 = o.elementTextToId.get(icCaseText(first));
-    const id2 = o.elementTextToId.get(icCaseText(second));
-    const idRes = o.elementTextToId.get(icCaseText(res));
+    const id1 = state.elementTextToId.get(icCaseText(first));
+    const id2 = state.elementTextToId.get(icCaseText(second));
+    const idRes = state.elementTextToId.get(icCaseText(res));
 
     const sortedFS = id2 > id1 ? [id1, id2] : [id2, id1];
-    if (icCaseId(o.recipesIngIC.get(sortedFS.join("="))) !== idRes) {
+    if (icCaseId(state.recipesIngIC.get(sortedFS.join("="))) !== idRes) {
       missing.add(`${first} + ${second} = ${res}`);
     }
   }
@@ -1042,9 +1027,9 @@ function alertOnMissingRecipes(input, alertPopup) {
   }
 }
 
-async function consoleMakeLineage(...goals) {
+async function generateLineage(...goals) {
   goals = goals.map((goal) => {
-    const goalId = o.elementTextToId.get(icCaseText(goal));
+    const goalId = state.elementTextToId.get(icCaseText(goal));
     if (goalId === undefined) throw new Error(`${goal} is not in your save...`);
     return goalId;
   });
@@ -1132,21 +1117,23 @@ class PriorityQueue {
 }
 
 function loadElements(items: ICItemData[]): void {
-  o.recipesIngIC = new Map();
-  o.recipesResIC = [];
-  o.recipesUsesIC = [];
-  o.elementHeur = [];
-  o.nonExistentIcCaseId = 0;
-  o.icCasedLookup = [];
-  o.elementIdToText = [];
-  o.elementTextToId = new Map();
+  state.recipesIngIC = new Map();
+  state.recipesResIC = [];
+  state.recipesUsesIC = [];
+  state.elementHeur = [];
+  state.nonExistentIcCaseId = 0;
+  state.icCasedLookup = [];
+  state.elementIdToText = [];
+  state.elementTextToId = new Map();
 
   for (const element of items) {
     addElement(element.text, element.id);
   }
 
-  o.baseElementsId = o.baseElementsString.map((x) => o.elementTextToId.get(x));
-  o.nonExistentIcCaseId = items.length + 20_000;
+  state.baseElementsId = state.baseElementsString.map((x) =>
+    state.elementTextToId.get(x),
+  );
+  state.nonExistentIcCaseId = items.length + 20_000;
 
   for (const element of items) {
     for (const [fID, sID] of element.recipes ?? []) {
@@ -1154,9 +1141,20 @@ function loadElements(items: ICItemData[]): void {
     }
   }
 
-  for (const baseElement of o.baseElementsId) o.elementHeur[baseElement] = 0;
+  for (const baseElement of state.baseElementsId)
+    state.elementHeur[baseElement] = 0;
 
-  generateElementHeuristics(o.baseElementsId);
+  generateElementHeuristics(state.baseElementsId);
 }
 
-export { lineage, loadElements };
+function loadFromSavefile(elements: ICElement[]): void {
+  return loadElements(
+    elements.map((e) => ({
+      text: e.text,
+      id: e.id,
+      recipes: e.recipes.map((r) => [r.a.id, r.b.id]),
+    })),
+  );
+}
+
+export { generateLineage, loadElements, loadFromSavefile };
