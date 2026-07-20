@@ -19,10 +19,14 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "test": "bun test --parallel=6",
+    "test": "bun test tests/hybrid.test.ts tests/infinibrowser.test.ts tests/infinibrowser-alternative-depth-calculation.test.ts",
+    "test:catstone": "bun test tests/catstone.test.ts --timeout=60000",
     "lint": "oxlint",
     "format": "oxfmt",
-    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling src",
+    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling/profilings profiling/index.ts",
+    "bench": "bun --expose-gc benchmarks/fast.ts",
+    "bench:catstone": "bun --expose-gc benchmarks/catstone.ts",
+    "bench:init": "bun --expose-gc benchmarks/init.ts",
     "build": "tsdown",
     "prepublishOnly": "bun run build"
   },
@@ -31,8 +35,10 @@
   },
   "devDependencies": {
     "@gameroman/config": "0.2.5",
+    "@infinite-craft/dom-types": "0.0.4",
     "@savefile/fixtures": "0.0.1",
     "@types/bun": "1.3.14",
+    "mitata": "1.0.34",
     "oxfmt": "0.59.0",
     "oxlint": "1.74.0",
     "oxlint-tsgolint": "0.25.0",

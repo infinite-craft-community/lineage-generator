@@ -1,0 +1,440 @@
+=== 2024-10-18.json ===
+
+=== 2024-10-18.json ===
+
+clk: ~1.86 GHz
+cpu: Intel(R) Core(TM) i5-4310M CPU @ 2.70GHz
+runtime: bun 1.4.0 (x64-win32)
+
+benchmark                             avg (min … max) p75 / p99    (min … top 1%)
+----------------------------------------------------- -------------------------------
+hybrid Plural                          412.87 µs/iter 443.30 µs ▃█                   
+                                (236.20 µs … 2.84 ms)   1.62 ms ██                   
+                              (  0.00  b …   1.28 mb)  47.90 kb ███▆▅▃▃▂▂▂▂▂▂▁▁▁▁▁▁▁▁
+
+infinibrowser Plural                    23.54 µs/iter  19.30 µs  █                   
+                                 (14.70 µs … 4.52 ms)  98.90 µs ▇█                   
+                              (  0.00  b … 252.00 kb) 134.49  b ██▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                             ╷┌───┬┐                                ╷
+                         hybrid Plural       ├┤   │├────────────────────────────────┤
+                                             ╵└───┴┘                                ╵
+                                       ┬ ╷
+                  infinibrowser Plural │─┤
+                                       ┴ ╵
+                                       └                                            ┘
+                                       14.70 µs           818.65 µs           1.62 ms
+
+summary
+  infinibrowser Plural
+   17.54x faster than hybrid Plural
+
+----------------------------------------------------- -------------------------------
+hybrid Detective                         7.39 ms/iter   7.88 ms   ▄█  ▂              
+                                  (6.24 ms … 9.44 ms)   9.35 ms   ██▆██ ▅▆    ▅      
+                              (  0.00  b …   1.99 mb) 417.59 kb ▅▅█████▇██▃▇███▁▃▅▁▃▅
+
+infinibrowser Detective                854.58 µs/iter   1.05 ms █▄                   
+                                (511.80 µs … 4.52 ms)   2.89 ms ██                   
+                              (  0.00  b … 720.00 kb)  19.96 kb ██▆▄▂▄▄▃▃▃▂▁▂▂▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                                    ╷  ┌──┬──┐      ╷
+                      hybrid Detective                              ├──┤  │  ├──────┤
+                                                                    ╵  └──┴──┘      ╵
+                                       ┌─┬┐        ╷
+               infinibrowser Detective │ │├────────┤
+                                       └─┴┘        ╵
+                                       └                                            ┘
+                                       511.80 µs           4.93 ms            9.35 ms
+
+summary
+  infinibrowser Detective
+   8.64x faster than hybrid Detective
+
+----------------------------------------------------- -------------------------------
+hybrid Acronym                         956.76 µs/iter 974.30 µs  █                   
+                                (788.00 µs … 2.77 ms)   2.17 ms ▂█▅                  
+                              (  0.00  b …   1.36 mb)  32.39 kb ███▇▅▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+
+infinibrowser Acronym                  395.14 µs/iter 394.50 µs  █                   
+                                (349.70 µs … 1.63 ms) 763.00 µs ██▇                  
+                              (  0.00  b … 208.00 kb)   1.61 kb ████▃▂▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                  ╷┌──┬                             ╷
+                        hybrid Acronym            ├┤  │─────────────────────────────┤
+                                                  ╵└──┴                             ╵
+                                       ┌┬        ╷
+                 infinibrowser Acronym ││────────┤
+                                       └┴        ╵
+                                       └                                            ┘
+                                       349.70 µs           1.26 ms            2.17 ms
+
+summary
+  infinibrowser Acronym
+   2.42x faster than hybrid Acronym
+
+----------------------------------------------------- -------------------------------
+hybrid Soul                            624.42 µs/iter 627.90 µs  █                   
+                                (556.20 µs … 1.76 ms)   1.36 ms ▂█▂                  
+                              (  0.00  b … 680.00 kb)   2.98 kb ███▄▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+infinibrowser Soul                      45.18 µs/iter  43.30 µs  █                   
+                                 (36.80 µs … 1.56 ms)  89.90 µs  █▅                  
+                              (  0.00  b …  80.00 kb)   1.08 kb ▃██▅▃▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                         ╷┌┬                        ╷
+                           hybrid Soul                   ├┤│────────────────────────┤
+                                                         ╵└┴                        ╵
+                                       ┬ ╷
+                    infinibrowser Soul │─┤
+                                       ┴ ╵
+                                       └                                            ┘
+                                       36.80 µs           696.95 µs           1.36 ms
+
+summary
+  infinibrowser Soul
+   13.82x faster than hybrid Soul
+
+----------------------------------------------------- -------------------------------
+hybrid Plural+Soul                     728.65 µs/iter 722.30 µs  █                   
+                                (631.60 µs … 1.95 ms)   1.50 ms  █▂                  
+                              (  0.00  b … 932.00 kb)  14.21 kb ▅██▄▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+infinibrowser Plural+Soul               53.72 µs/iter  51.80 µs  █                   
+                                 (43.30 µs … 1.78 ms) 101.80 µs  █▇                  
+                              (  0.00  b …  88.00 kb)   1.66 kb ▂██▆▃▃▃▂▁▁▂▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                         ╷┌─┬                       ╷
+                    hybrid Plural+Soul                   ├┤ │───────────────────────┤
+                                                         ╵└─┴                       ╵
+                                       ┬ ╷
+             infinibrowser Plural+Soul │─┤
+                                       ┴ ╵
+                                       └                                            ┘
+                                       43.30 µs           769.25 µs           1.50 ms
+
+summary
+  infinibrowser Plural+Soul
+   13.56x faster than hybrid Plural+Soul
+
+----------------------------------------------------- -------------------------------
+hybrid Plural+Detective+Acronym          7.79 ms/iter   8.41 ms   █▄                 
+                                 (6.31 ms … 13.94 ms)  12.37 ms ▂▅██▄  ▇             
+                              (  0.00  b …   3.45 mb) 637.12 kb █████▅▄█▁█▄▄▂▁▂▁▁▁▂▂▂
+
+infinibrowser Plural+Detective+Acronym 707.09 µs/iter 714.30 µs  █                   
+                                (611.30 µs … 2.39 ms)   1.96 ms ▄█                   
+                              (  0.00  b … 700.00 kb)  16.88 kb ███▃▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                             ╷ ┌──┬──┐              ╷
+       hybrid Plural+Detective+Acronym                       ├─┤  │  ├──────────────┤
+                                                             ╵ └──┴──┘              ╵
+                                       ┬    ╷
+infinibrowser Plural+Detective+Acronym │────┤
+                                       ┴    ╵
+                                       └                                            ┘
+                                       611.30 µs           6.49 ms           12.37 ms
+
+summary
+  infinibrowser Plural+Detective+Acronym
+   11.01x faster than hybrid Plural+Detective+Acronym
+
+=== 2025-04-04.ic ===
+
+=== 2025-04-04.ic ===
+
+clk: ~1.43 GHz
+cpu: Intel(R) Core(TM) i5-4310M CPU @ 2.70GHz
+runtime: bun 1.4.0 (x64-win32)
+
+benchmark                             avg (min … max) p75 / p99    (min … top 1%)
+----------------------------------------------------- -------------------------------
+hybrid Plural                          703.30 µs/iter 771.10 µs  █                   
+                                (570.00 µs … 1.85 ms)   1.24 ms  █                   
+                              (  0.00  b … 652.00 kb)  98.10 kb ▆██▆▃▃▅▃▃▂▄▃▂▂▁▁▁▁▁▁▁
+
+infinibrowser Plural                    30.95 µs/iter  29.40 µs  █                   
+                               (23.90 µs … 821.40 µs)  77.20 µs  █▃                  
+                              (  0.00  b … 260.00 kb) 217.93  b ▄██▃▂▂▁▁▁▁▂▂▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                           ╷┌───┬──┐                ╷
+                         hybrid Plural                     ├┤   │  ├────────────────┤
+                                                           ╵└───┴──┘                ╵
+                                       ┬ ╷
+                  infinibrowser Plural │─┤
+                                       ┴ ╵
+                                       └                                            ┘
+                                       23.90 µs           631.30 µs           1.24 ms
+
+summary
+  infinibrowser Plural
+   22.73x faster than hybrid Plural
+
+----------------------------------------------------- -------------------------------
+hybrid Detective                         6.07 ms/iter   6.84 ms  █     ▂             
+                                 (4.43 ms … 12.48 ms)  11.39 ms ▄█▇    █             
+                              (  0.00  b … 992.00 kb) 175.00 kb █████▂███▃▂▁▂▂▂▁▄▁▁▁▂
+
+infinibrowser Detective                608.35 µs/iter 653.00 µs ▆█                   
+                                (419.00 µs … 4.32 ms)   1.77 ms ██▃                  
+                              (  0.00  b … 472.00 kb)   6.33 kb ████▇▄▄▃▂▂▂▂▂▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                       ╷ ┌────┬──┐                  ╷
+                      hybrid Detective                 ├─┤    │  ├──────────────────┤
+                                                       ╵ └────┴──┘                  ╵
+                                       ┌┬    ╷
+               infinibrowser Detective ││────┤
+                                       └┴    ╵
+                                       └                                            ┘
+                                       419.00 µs           5.91 ms           11.39 ms
+
+summary
+  infinibrowser Detective
+   9.98x faster than hybrid Detective
+
+----------------------------------------------------- -------------------------------
+hybrid Acronym                         945.87 µs/iter 951.20 µs █ ▃                  
+                                (640.20 µs … 3.62 ms)   2.89 ms █▆█                  
+                              (  0.00  b … 864.00 kb)  28.09 kb ███▇▅▂▂▃▂▂▂▁▁▁▁▁▁▂▁▁▁
+
+infinibrowser Acronym                   37.71 µs/iter  34.30 µs  █                   
+                                 (27.50 µs … 1.11 ms) 126.70 µs ▂█                   
+                              (  0.00  b … 260.00 kb)  18.50  b ██▄▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                 ┌───┬┐                             ╷
+                        hybrid Acronym           │   │├─────────────────────────────┤
+                                                 └───┴┘                             ╵
+                                       ┬ ╷
+                 infinibrowser Acronym │─┤
+                                       ┴ ╵
+                                       └                                            ┘
+                                       27.50 µs            1.46 ms            2.89 ms
+
+summary
+  infinibrowser Acronym
+   25.08x faster than hybrid Acronym
+
+----------------------------------------------------- -------------------------------
+hybrid Soul                              1.15 ms/iter   1.21 ms  █                   
+                                (908.40 µs … 2.94 ms)   2.51 ms  █▂                  
+                              (  0.00  b … 260.00 kb)   1.40 kb ███▆▆▅▃▂▂▂▂▁▁▁▂▁▁▁▁▁▁
+
+infinibrowser Soul                     176.99 µs/iter 156.00 µs █▅                   
+                                (68.00 µs … 20.47 ms)   1.17 ms ██▂                  
+                              (  0.00  b … 296.00 kb)  12.33 kb ███▄▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                      ╷ ┌──┬┐                       ╷
+                           hybrid Soul                ├─┤  │├───────────────────────┤
+                                                      ╵ └──┴┘                       ╵
+                                       ┌─┬                 ╷
+                    infinibrowser Soul │ │─────────────────┤
+                                       └─┴                 ╵
+                                       └                                            ┘
+                                       68.00 µs            1.29 ms            2.51 ms
+
+summary
+  infinibrowser Soul
+   6.51x faster than hybrid Soul
+
+----------------------------------------------------- -------------------------------
+hybrid Plural+Soul                       2.32 ms/iter   2.34 ms █▂                   
+                                 (1.12 ms … 16.27 ms)  12.14 ms ██                   
+                              (  0.00  b … 824.00 kb) 128.74 kb ███▅▃▃▂▂▁▂▁▁▁▁▁▁▁▁▁▁▁
+
+infinibrowser Plural+Soul              137.54 µs/iter 130.30 µs █▇                   
+                                 (86.60 µs … 4.63 ms) 534.00 µs ██                   
+                              (  0.00  b … 288.00 kb)   8.85 kb ██▆▄▄▃▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                           ┌───┬                                    ╷
+                    hybrid Plural+Soul     │   │────────────────────────────────────┤
+                                           └───┴                                    ╵
+                                       ┬ ╷
+             infinibrowser Plural+Soul │─┤
+                                       ┴ ╵
+                                       └                                            ┘
+                                       86.60 µs           6.11 ms            12.14 ms
+
+summary
+  infinibrowser Plural+Soul
+   16.89x faster than hybrid Plural+Soul
+
+----------------------------------------------------- -------------------------------
+hybrid Plural+Detective+Acronym          7.69 ms/iter   8.66 ms ▃█▅                  
+                                 (4.40 ms … 18.80 ms)  16.91 ms ███  ▅▂              
+                              (  0.00  b …   3.14 mb) 358.68 kb ████▆██▇▃▄▄▃▄▄▁▃▃▃▃▄▄
+
+infinibrowser Plural+Detective+Acronym 642.13 µs/iter 701.70 µs  █                   
+                                (452.90 µs … 2.18 ms)   1.66 ms ██▅                  
+                              (  0.00  b … 532.00 kb)   7.68 kb ███▆▆▄▃▄▃▃▂▁▂▂▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                  ╷┌───────┬─┐                      ╷
+       hybrid Plural+Detective+Acronym            ├┤       │ ├──────────────────────┤
+                                                  ╵└───────┴─┘                      ╵
+                                       ┌┬ ╷
+infinibrowser Plural+Detective+Acronym ││─┤
+                                       └┴ ╵
+                                       └                                            ┘
+                                       452.90 µs           8.68 ms           16.91 ms
+
+summary
+  infinibrowser Plural+Detective+Acronym
+   11.98x faster than hybrid Plural+Detective+Acronym
+
+=== catstone-2026-06-06.ic ===
+
+=== catstone-2026-06-06.ic ===
+
+clk: ~1.26 GHz
+cpu: Intel(R) Core(TM) i5-4310M CPU @ 2.70GHz
+runtime: bun 1.4.0 (x64-win32)
+
+benchmark                             avg (min … max) p75 / p99    (min … top 1%)
+----------------------------------------------------- -------------------------------
+hybrid Plural                            4.09 ms/iter   5.12 ms    █▄                
+                                  (1.88 ms … 7.82 ms)   7.45 ms    ██▆▅▃ ▄  ▅        
+                              (  0.00  b …   1.54 mb) 980.48 kb ▄▂█████████▆██▅▇▃▆▃▃▂
+
+infinibrowser Plural                   115.35 µs/iter 114.70 µs  █                   
+                               (91.40 µs … 711.90 µs) 271.50 µs  █▇                  
+                              (  0.00  b … 544.00 kb)   9.58 kb ▆██▆▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                  ╷     ┌──────┬──────┐             ╷
+                         hybrid Plural            ├─────┤      │      ├─────────────┤
+                                                  ╵     └──────┴──────┘             ╵
+                                       ┬╷
+                  infinibrowser Plural │┤
+                                       ┴╵
+                                       └                                            ┘
+                                       91.40 µs            3.77 ms            7.45 ms
+
+summary
+  infinibrowser Plural
+   35.47x faster than hybrid Plural
+
+----------------------------------------------------- -------------------------------
+hybrid Detective                       481.96 µs/iter 497.50 µs ▂▅▄█                 
+                                (358.50 µs … 1.28 ms)   1.05 ms ████▃                
+                              (  0.00  b … 792.00 kb)  49.52 kb █████▇▄▄▃▃▂▂▂▂▂▂▁▂▂▁▁
+
+infinibrowser Detective                 18.64 µs/iter  18.98 µs    █ █               
+                                (17.25 µs … 21.60 µs)  21.11 µs ▅▅▅█▅█   ▅ ▅        ▅
+                              (  0.00  b …   6.00 kb)   1.03 kb ██████▁▁▁█▁█▁▁▁▁▁▁▁▁█
+
+                                       ┌                                            ┐
+                                                      ╷┌───┬┐                       ╷
+                      hybrid Detective                ├┤   │├───────────────────────┤
+                                                      ╵└───┴┘                       ╵
+                                       ┬
+               infinibrowser Detective │
+                                       ┴
+                                       └                                            ┘
+                                       17.25 µs           534.18 µs           1.05 ms
+
+summary
+  infinibrowser Detective
+   25.86x faster than hybrid Detective
+
+----------------------------------------------------- -------------------------------
+hybrid Acronym                           2.44 ms/iter   2.61 ms    █▆                
+                                  (1.92 ms … 4.61 ms)   4.22 ms ▄████▇▅              
+                              (  0.00  b …   1.05 mb) 269.10 kb █████████▅▃▃▄▃▂▂▁▁▁▂▂
+
+infinibrowser Acronym                  168.47 µs/iter 169.60 µs  █                   
+                                (134.40 µs … 1.16 ms) 386.30 µs ▂██                  
+                              (  0.00  b …  48.00 kb)   9.84 kb ████▄▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                           ╷ ┌──┬─┐                 ╷
+                        hybrid Acronym                     ├─┤  │ ├─────────────────┤
+                                                           ╵ └──┴─┘                 ╵
+                                       ┬  ╷
+                 infinibrowser Acronym │──┤
+                                       ┴  ╵
+                                       └                                            ┘
+                                       134.40 µs           2.18 ms            4.22 ms
+
+summary
+  infinibrowser Acronym
+   14.51x faster than hybrid Acronym
+
+----------------------------------------------------- -------------------------------
+hybrid Soul                              1.32 ms/iter   1.39 ms  █  ▆                
+                                  (1.05 ms … 2.54 ms)   2.25 ms ▇█▂██▆               
+                              (  0.00  b … 592.00 kb) 205.63 kb ███████▇▄▄▃▃▂▃▂▂▂▁▂▁▁
+
+infinibrowser Soul                      96.79 µs/iter  98.70 µs  ▇█                  
+                               (73.20 µs … 684.70 µs) 229.90 µs ▂██▄                 
+                              (  0.00  b … 532.00 kb)  11.61 kb ████▇▄▃▃▂▂▂▂▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                           ╷ ┌───┬┐                 ╷
+                           hybrid Soul                     ├─┤   │├─────────────────┤
+                                                           ╵ └───┴┘                 ╵
+                                       ┬┐ ╷
+                    infinibrowser Soul │├─┤
+                                       ┴┘ ╵
+                                       └                                            ┘
+                                       73.20 µs            1.16 ms            2.25 ms
+
+summary
+  infinibrowser Soul
+   13.62x faster than hybrid Soul
+
+----------------------------------------------------- -------------------------------
+hybrid Plural+Soul                       3.11 ms/iter   3.41 ms    █▂▃               
+                                  (2.37 ms … 5.07 ms)   4.89 ms ▃▇▅███▆▃▄            
+                              (  0.00  b …   1.34 mb) 417.35 kb ███████████▆▇▄▃▁▂▂▂▂▂
+
+infinibrowser Plural+Soul              218.48 µs/iter 218.40 µs  █                   
+                                (158.60 µs … 1.10 ms) 647.40 µs ▇█▅                  
+                              (  0.00  b … 128.00 kb)  15.36 kb ███▅▃▃▄▃▂▂▁▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                            ╷  ┌───┬──┐             ╷
+                    hybrid Plural+Soul                      ├──┤   │  ├─────────────┤
+                                                            ╵  └───┴──┘             ╵
+                                       ┌┬   ╷
+             infinibrowser Plural+Soul ││───┤
+                                       └┴   ╵
+                                       └                                            ┘
+                                       158.60 µs           2.52 ms            4.89 ms
+
+summary
+  infinibrowser Plural+Soul
+   14.24x faster than hybrid Plural+Soul
+
+----------------------------------------------------- -------------------------------
+hybrid Plural+Detective+Acronym          6.54 ms/iter   7.86 ms   ▅ █                
+                                 (4.06 ms … 10.73 ms)  10.69 ms  ▃█▅█▅▅    ▃▅        
+                              (  0.00  b …   0.98 mb) 460.75 kb ▆████████▃███▄▄▄▆█▆▁▃
+
+infinibrowser Plural+Detective+Acronym 368.37 µs/iter 379.80 µs █▃                   
+                                (245.10 µs … 1.86 ms)   1.25 ms ██                   
+                              (  0.00  b …  92.00 kb)  10.60 kb ██▇▄▄▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+
+                                       ┌                                            ┐
+                                                       ╷    ┌─────┬─────┐           ╷
+       hybrid Plural+Detective+Acronym                 ├────┤     │     ├───────────┤
+                                                       ╵    └─────┴─────┘           ╵
+                                       ┌┬  ╷
+infinibrowser Plural+Detective+Acronym ││──┤
+                                       └┴  ╵
+                                       └                                            ┘
+                                       245.10 µs           5.47 ms           10.69 ms
+
+summary
+  infinibrowser Plural+Detective+Acronym
+   17.75x faster than hybrid Plural+Detective+Acronym

@@ -1,7 +1,7 @@
 {
   "extends": "@gameroman/config/ts/isolated",
   "compilerOptions": {
-    "types": ["bun"]
+    "types": ["bun", "@infinite-craft/dom-types"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "benchmarks"]
 }

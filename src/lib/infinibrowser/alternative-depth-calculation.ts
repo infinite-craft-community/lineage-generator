@@ -34,7 +34,7 @@ async function preCalculateElementDepths(saveElements: ICElement[]) {
     }
   }
 
-  let queue: ICElementWithDepth[] = baseElements.slice();
+  const queue: ICElementWithDepth[] = baseElements.slice();
   const pending = new Set<ICElementWithDepth>(queue);
   let head = 0;
   let updateCount = 0;
