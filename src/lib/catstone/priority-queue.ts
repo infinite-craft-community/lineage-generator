@@ -10,7 +10,7 @@ class PriorityQueue<T> {
   _heap: T[];
   _comparator: Comparator<T>;
 
-  constructor(comparator: Comparator<T> = (a, b) => (a as any) > (b as any)) {
+  constructor(comparator: Comparator<T>) {
     this._heap = [];
     this._comparator = comparator;
   }

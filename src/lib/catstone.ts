@@ -373,7 +373,7 @@ function correctlyCapsAndOrderLineage(
       missingElements.push(element);
       continue;
     }
-    let neededIngs = [];
+    const neededIngs = [];
     for (const ing of recipe) {
       if (!state.baseElementsId.includes(ing) && !crafted.has(ing)) {
         neededIngs.push(ing);
@@ -415,11 +415,12 @@ interface CatstoneMultipleMethodsResult {
 }
 
 interface CatstoneResult {
-  generateLineage(target: string | string[]): Promise<CatstoneLineageResult>;
+  generateLineage(
+    target: string | readonly string[],
+  ): Promise<CatstoneLineageResult>;
   generateLineageMultipleMethods(
     goals: string[],
   ): AsyncGenerator<CatstoneMultipleMethodsResult>;
-  state: State;
 }
 
 function toLineageSteps(state: State, lineage: ICLineage): CatstoneStep[] {
@@ -474,9 +475,8 @@ function loadElements(items: ICItemData[]): CatstoneResult {
   }
 
   return {
-    state,
     async generateLineage(
-      target: string | string[],
+      target: string | readonly string[],
     ): Promise<CatstoneLineageResult> {
       const goals = Array.isArray(target) ? target : [target];
       const goalIds = resolveGoals(goals);

@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["bun", "@infinite-craft/dom-types"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "benchmarks"]
 }

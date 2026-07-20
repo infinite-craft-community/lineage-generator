@@ -392,9 +392,8 @@ function toLineageSteps(state: State, lineage: ICLineage): HybridStep[] {
 
 interface HybridResult {
   generateLineage(
-    target: string | string[],
+    target: string | readonly string[],
   ): Promise<{ lineage: HybridStep[]; missingElements: string[] }>;
-  state: State;
 }
 
 const recipeSelectors: RecipeSelector[] = [
@@ -448,9 +447,8 @@ function loadElements(items: ICItemData[]): HybridResult {
   }
 
   return {
-    state,
     async generateLineage(
-      target: string | string[],
+      target: string | readonly string[],
     ): Promise<{ lineage: HybridStep[]; missingElements: string[] }> {
       const goals = Array.isArray(target) ? target : [target];
       const goalIds = resolveGoals(goals);
