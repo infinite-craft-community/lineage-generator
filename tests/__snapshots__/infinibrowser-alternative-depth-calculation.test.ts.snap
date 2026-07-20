@@ -1722,3 +1722,30 @@ Vacuum + Vacuum = Black Hole
 Black Hole + River = Singularity
 Not + Singularity = Plural"
 `;
+
+exports[`generateLineage 2024-10-18.json savefile should generate a lineage for 'Plural' 2`] = `
+"Water + Water = Lake
+Fire + Water = Steam
+Fire + Steam = Engine
+Earth + Water = Plant
+Engine + Plant = Car
+Lake + Water = Ocean
+Earth + Ocean = Island
+Car + Island = Parking
+Lake + Parking = Lot
+Earth + Wind = Dust
+Earth + Lake = Swamp
+Fire + Swamp = Dragon
+Dust + Fire = Ash
+Ash + Fire = Phoenix
+Dragon + Phoenix = Yin Yang
+Wind + Yin Yang = Feng Shui
+Dust + Feng Shui = Dust Bunny
+Dust Bunny + Yin Yang = Opposite
+Lot + Opposite = Not
+Dust + Engine = Vacuum
+Fire + Vacuum = Black Hole
+Wind + Wind = Tornado
+Black Hole + Tornado = Singularity
+Not + Singularity = Plural"
+`;
