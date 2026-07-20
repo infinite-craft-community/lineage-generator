@@ -1,8 +1,10 @@
-const o = {
-  baseElementsString: ["Water", "Fire", "Wind", "Earth"],
-  baseElementsId: null, // gets updated in `reloadGameData`
+import type { ICItemData } from "@infinite-craft/dom-types";
 
-  recipesIngIC: new Map(), // "Water=Water" => "Lake"
+const o = {
+  baseElementsString: ["Water", "Fire", "Wind", "Earth"] as const,
+  baseElementsId: null, // gets updated in `loadElements`
+
+  recipesIngIC: new Map<string, number>(), // "Water=Water" => "Lake"
   recipesResIC: [], // "Lake" => ["Water", "Water"]
   recipesUsesIC: [], // "Water" => ["Water", "Lake"]
   elementHeur: [], // "Lake" => 1
@@ -10,11 +12,11 @@ const o = {
   nonExistentIcCaseId: 0,
   icCasedLookup: [],
   elementIdToText: [], // 1 => "Fire"
-  elementTextToId: new Map(), // "Fire" => 1
+  elementTextToId: new Map<string, number>(), // "Fire" => 1
 };
 
 const lineage = {
-  refresh: reloadGameData,
+  refresh: loadElements,
   make: consoleMakeLineage,
   vars: o,
   icCaseText,
@@ -87,7 +89,7 @@ window.addEventListener("load", () => {
   const addAPI = v_container.addAPI;
   v_container.addAPI = function () {
     // elements loaded!!!
-    setTimeout(reloadGameData, 0);
+    setTimeout(loadElements, 0);
     v_container.addAPI = addAPI;
     return addAPI.apply(this, arguments);
   };
@@ -107,7 +109,7 @@ window.addEventListener("load", () => {
       if (!v_container.isLoading) {
         clearInterval(intervalId);
         console.log("finished", IC.getItems());
-        reloadGameData();
+        loadElements();
       }
     }, 10);
   }
@@ -168,55 +170,26 @@ window.addEventListener("load", () => {
   );
 });
 
-function reloadGameData() {
-  o.recipesIngIC = new Map();
-  o.recipesResIC = [];
-  o.recipesUsesIC = [];
-  o.elementHeur = [];
-  o.nonExistentIcCaseId = 0;
-  o.icCasedLookup = [];
-  o.elementIdToText = [];
-  o.elementTextToId = new Map();
-
-  console.time("Load Data");
-  const ICItems = window.IC.getItems();
-  for (const element of ICItems) {
-    addElement(element.text, element.id);
-  }
-  o.baseElementsId = o.baseElementsString.map((x) => o.elementTextToId.get(x));
-  o.nonExistentIcCaseId = ICItems.length + 20000;
-
-  for (const element of ICItems) {
-    for (const [fID, sID] of element?.recipes ?? []) {
-      addRecipe(fID, sID, element.id, false);
-    }
-  }
-  console.timeEnd("Load Data");
-
-  console.time("Generate Heuristics");
-  for (const baseElement of o.baseElementsId) o.elementHeur[baseElement] = 0;
-  generateElementHeuristics(o.baseElementsId);
-  console.timeEnd("Generate Heuristics");
-
-  console.log("Variables generated: (window.lineage.vars)", o);
-}
-
-function addElement(text, id) {
+function addElement(text: string, id: number): void {
   o.elementIdToText[id] = text;
   o.elementTextToId.set(text, id);
 }
 
-function addRecipe(f, s, r) {
-  if (!Number.isInteger(f) || !Number.isInteger(s) || !Number.isInteger(r))
+function addRecipe(first: number, second: number, result: number): void {
+  if (
+    !Number.isInteger(first) ||
+    !Number.isInteger(second) ||
+    !Number.isInteger(result)
+  )
     return;
-  const F = icCaseId(f);
-  const S = icCaseId(s);
-  const R = icCaseId(r);
+  const F = icCaseId(first);
+  const S = icCaseId(second);
+  const R = icCaseId(result);
   if (F === R || S === R) return;
 
   const sortedFS = S > F ? [F, S] : [S, F];
   const combString = sortedFS.join("=");
-  o.recipesIngIC.set(combString, r);
+  o.recipesIngIC.set(combString, result);
 
   pushToArrayArray(o.recipesResIC, R, sortedFS);
   pushToArrayArray(o.recipesUsesIC, F, [S, R]);
@@ -227,11 +200,12 @@ function pushToArrayArray(arr, key, value) {
   if (!a) arr[key] = [value];
   else a.push(value);
 }
-function sleep(ms) {
+
+function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function icCaseText(inputText) {
+function icCaseText(inputText: string) {
   if (!inputText) return undefined;
 
   let resultText = "";
@@ -244,7 +218,7 @@ function icCaseText(inputText) {
   }
   return resultText;
 }
-function icCaseId(inputId) {
+function icCaseId(inputId: number): number {
   const mapOutput = o.icCasedLookup[inputId];
   if (mapOutput !== undefined) return mapOutput;
 
@@ -824,7 +798,7 @@ async function helperRenderBody(container, item) {
 
   drawGoalsAndInitLineage();
 
-  function processNewGoalElements(newGoals) {
+  function processNewGoalElements(newGoals: string[]) {
     let update = false;
     for (const newGoal of newGoals) {
       const icGoalText = icCaseText(newGoal.trim());
@@ -1157,4 +1131,32 @@ class PriorityQueue {
   }
 }
 
-export { lineage };
+function loadElements(items: ICItemData[]): void {
+  o.recipesIngIC = new Map();
+  o.recipesResIC = [];
+  o.recipesUsesIC = [];
+  o.elementHeur = [];
+  o.nonExistentIcCaseId = 0;
+  o.icCasedLookup = [];
+  o.elementIdToText = [];
+  o.elementTextToId = new Map();
+
+  for (const element of items) {
+    addElement(element.text, element.id);
+  }
+
+  o.baseElementsId = o.baseElementsString.map((x) => o.elementTextToId.get(x));
+  o.nonExistentIcCaseId = items.length + 20_000;
+
+  for (const element of items) {
+    for (const [fID, sID] of element.recipes ?? []) {
+      addRecipe(fID, sID, element.id);
+    }
+  }
+
+  for (const baseElement of o.baseElementsId) o.elementHeur[baseElement] = 0;
+
+  generateElementHeuristics(o.baseElementsId);
+}
+
+export { lineage, loadElements };

@@ -1,6 +1,6 @@
 import type { ICElement, ICElementRecipe } from "savefile.js";
 
-export type ICElementRecipeWithDepth = ICElementRecipe & {
+type ICElementRecipeWithDepth = ICElementRecipe & {
   a: ICElementWithDepth;
   b: ICElementWithDepth;
 };
@@ -50,7 +50,7 @@ function findOptimalRecipe(
   );
 }
 
-export async function getLineageSteps(
+async function getLineageSteps(
   targets: ICElementWithDepth[],
   baseElements: ICElementWithDepth[],
 ): Promise<readonly [Step[], ICElementWithDepth[]]> {
@@ -111,12 +111,12 @@ export async function getLineageSteps(
   return [recipes, missing] as const;
 }
 
-export interface GenerateLineageResult {
+interface GenerateLineageResult {
   readonly lineage: Step[];
   readonly missing: ICElementWithDepth[];
 }
 
-export async function sortLineageSteps(
+async function sortLineageSteps(
   steps: Step[],
   missingElements: ICElementWithDepth[],
   elements: ICElementWithDepth[],
@@ -148,7 +148,7 @@ export async function sortLineageSteps(
   return sortedSteps;
 }
 
-export function pruneLineage(steps: Step[], targets: Set<ICElement>): void {
+function pruneLineage(steps: Step[], targets: Set<ICElement>): void {
   const elementToStepMap = new Map<ICElementWithDepth, Step>();
 
   for (const step of steps) {
@@ -171,10 +171,9 @@ export function pruneLineage(steps: Step[], targets: Set<ICElement>): void {
 }
 
 export interface CalculateElementDepthsResult {
-  generateLineage(target: ICElement | ICElement[]): Promise<{
-    readonly lineage: Step[];
-    readonly missing: ICElementWithDepth[];
-  }>;
+  generateLineage(
+    target: ICElement | ICElement[],
+  ): Promise<GenerateLineageResult>;
 }
 
 export async function generateLineage(
