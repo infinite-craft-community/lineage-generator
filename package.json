@@ -22,7 +22,7 @@
     "test": "bun test --parallel=6",
     "lint": "oxlint",
     "format": "oxfmt",
-    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling src",
+    "prof": "bun --cpu-prof-md --cpu-prof-dir ./profiling/profilings profiling/index.ts",
     "build": "tsdown",
     "prepublishOnly": "bun run build"
   },

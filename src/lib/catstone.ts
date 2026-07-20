@@ -1,14 +1,16 @@
 import type { ICItemData } from "@infinite-craft/dom-types";
 import type { ICElement } from "savefile.js";
 
-import { icCaseText, pushToArrayArray, sleep } from "./catstone/helpers";
+import { icCaseText, pushToArrayArray } from "./catstone/helpers";
 import { PriorityQueue } from "./catstone/priority-queue";
 
 const baseElementsString = ["Water", "Fire", "Wind", "Earth"] as const;
 
 type ICItemDataRecipe = [first: number, second: number];
 type ICItemDataRecipes = ICItemDataRecipe[];
-type ICLineage = [first: number, second: number, result: number][];
+type ICLineageStep = [first: number, second: number, result: number];
+type ICLineage = ICLineageStep[];
+type CatstoneStep = [string, string, string];
 
 interface State {
   baseElementsId: number[];
@@ -78,20 +80,22 @@ function icCaseId(state: State, inputId: number): number {
   return resultId;
 }
 
-async function* generateLineageMultipleMethods(state: State, goals: number[]) {
+async function* generateLineageMultipleMethodsInternal(
+  state: State,
+  goals: number[],
+) {
   const lineageGenerators = {
-    Simple: async () => await generateLineageInternal(state, goals),
-    "Normal Recalc": async () => await generateLineageInternal(state, goals, 1),
-    "Reverse Recalc": async () =>
-      await generateLineageInternal(state, goals, 2),
-    "Min Recalc": async () => await generateLineageInternal(state, goals, 3),
-    "Max Recalc": async () => await generateLineageInternal(state, goals, 4),
-    "Random Recalc": async () => await generateLineageInternal(state, goals, 5),
+    Simple: () => generateLineageInternal(state, goals),
+    "Normal Recalc": () => generateLineageInternal(state, goals, 1),
+    "Reverse Recalc": () => generateLineageInternal(state, goals, 2),
+    "Min Recalc": () => generateLineageInternal(state, goals, 3),
+    "Max Recalc": () => generateLineageInternal(state, goals, 4),
+    "Random Recalc": () => generateLineageInternal(state, goals, 5),
   };
 
   // Now iterate through the generators and run them
   for (const [methodName, generateFunc] of Object.entries(lineageGenerators)) {
-    const { lineage, missingElements } = await generateFunc();
+    const { lineage, missingElements } = generateFunc();
     yield { lineage, methodName, missingElements };
   }
 }
@@ -159,7 +163,7 @@ function findBestRecipeHeur(
   return bestRecipe;
 }
 
-async function generateLineageInternal(
+function generateLineageInternal(
   state: State,
   goals: number[],
   recalc: false | number = false,
@@ -231,8 +235,6 @@ async function generateLineageInternal(
           { element: undefined, heur: -Infinity },
         );
 
-        // tiny sleep to let the ui update
-        await sleep(0);
         generateElementHeuristics(state, [element], heurMap, worst.heur);
       }
     }
@@ -351,15 +353,15 @@ function correctlyCapsAndOrderLineage(
   lineage: ICLineage,
   goals: number[],
 ) {
-  const resultIngMap = new Map(
+  const resultIngMap: ResultIngredientsMap = new Map<number, ICItemDataRecipe>(
     lineage.map((recipe) => [recipe[2], [recipe[0], recipe[1]]]),
   );
 
   const elementQueue = [...goals];
-  const crafted = new Set();
-  const capsMap = new Map();
+  const crafted = new Set<number>();
+  const capsMap = new Map<number, number>();
   const missingElements = [];
-  const newLineage = [];
+  const newLineage: ICLineage = [];
 
   while (elementQueue.length > 0) {
     const element = elementQueue.pop()!;
@@ -384,10 +386,10 @@ function correctlyCapsAndOrderLineage(
         (<ICItemDataRecipe>[recipe[0], recipe[1]])
           .sort((a, b) => a - b)
           .join("="),
-      );
+      )!;
       capsMap.set(element, actualResult);
-      const newRecipe = [recipe[0], recipe[1], element].map(
-        (x) => capsMap.get(x) ?? x,
+      const newRecipe = <ICLineageStep>(
+        [recipe[0], recipe[1], element].map((x) => capsMap.get(x) ?? x)
       );
       if (
         state.elementIdToText[newRecipe[0]]! >
@@ -401,26 +403,34 @@ function correctlyCapsAndOrderLineage(
   return { lineage: newLineage, missingElements };
 }
 
-async function generateLineage(state: State, ...goals: string[]) {
-  const normalizedGoals = goals.map((goal) => {
-    const goalId = state.elementTextToId.get(icCaseText(goal));
-    if (goalId === undefined) throw new Error(`${goal} is not in your save...`);
-    return goalId;
-  });
-
-  let bestResult = null;
-  for await (const lineage of generateLineageMultipleMethods(
-    state,
-    normalizedGoals,
-  )) {
-    if (!bestResult || lineage.lineage.length < bestResult.lineage.length) {
-      bestResult = lineage;
-    }
-  }
-  return bestResult;
+interface CatstoneLineageResult {
+  readonly lineage: CatstoneStep[];
+  readonly missingElements: string[];
 }
 
-function loadElements(items: ICItemData[]): { state: State } {
+interface CatstoneMultipleMethodsResult {
+  readonly lineage: CatstoneStep[];
+  readonly methodName: string;
+  readonly missingElements: string[];
+}
+
+interface CatstoneResult {
+  generateLineage(target: string | string[]): Promise<CatstoneLineageResult>;
+  generateLineageMultipleMethods(
+    goals: string[],
+  ): AsyncGenerator<CatstoneMultipleMethodsResult>;
+  state: State;
+}
+
+function toLineageSteps(state: State, lineage: ICLineage): CatstoneStep[] {
+  return lineage.map((recipe) => [
+    state.elementIdToText[recipe[0]]!,
+    state.elementIdToText[recipe[1]]!,
+    state.elementIdToText[recipe[2]]!,
+  ]);
+}
+
+function loadElements(items: ICItemData[]): CatstoneResult {
   const state: State = {
     recipesIngIC: new Map(),
     recipesResIC: [],
@@ -455,10 +465,62 @@ function loadElements(items: ICItemData[]): { state: State } {
 
   generateElementHeuristics(state, state.baseElementsId, state.elementHeur);
 
-  return { state };
+  function resolveGoals(goals: string[]): number[] {
+    return goals.map((goal) => {
+      const id = state.elementTextToId.get(icCaseText(goal));
+      if (id === undefined) throw new Error(`Unknown element: ${goal}`);
+      return id;
+    });
+  }
+
+  return {
+    state,
+    async generateLineage(
+      target: string | string[],
+    ): Promise<CatstoneLineageResult> {
+      const goals = Array.isArray(target) ? target : [target];
+      const goalIds = resolveGoals(goals);
+
+      let bestResult = null;
+      for await (const result of generateLineageMultipleMethodsInternal(
+        state,
+        goalIds,
+      )) {
+        if (result.methodName === "Random Recalc") continue;
+        if (!bestResult || result.lineage.length < bestResult.lineage.length) {
+          bestResult = result;
+        }
+      }
+
+      return {
+        lineage: toLineageSteps(state, bestResult!.lineage),
+        missingElements: bestResult!.missingElements.map(
+          (id) => state.elementIdToText[id]!,
+        ),
+      };
+    },
+
+    async *generateLineageMultipleMethods(
+      goals: string[],
+    ): AsyncGenerator<CatstoneMultipleMethodsResult> {
+      const goalIds = resolveGoals(goals);
+      for await (const result of generateLineageMultipleMethodsInternal(
+        state,
+        goalIds,
+      )) {
+        yield {
+          lineage: toLineageSteps(state, result.lineage),
+          methodName: result.methodName,
+          missingElements: result.missingElements.map(
+            (id) => state.elementIdToText[id]!,
+          ),
+        };
+      }
+    },
+  };
 }
 
-function loadFromSavefile(elements: ICElement[]): { state: State } {
+function loadFromSavefile(elements: ICElement[]): CatstoneResult {
   return loadElements(
     elements.map((e) => ({
       text: e.text,
@@ -495,9 +557,12 @@ function addElementIncremental(
   }
 }
 
-export {
-  generateLineage,
-  loadElements,
-  loadFromSavefile,
-  addElementIncremental,
+export { loadElements, loadFromSavefile, addElementIncremental };
+
+export type {
+  CatstoneResult,
+  CatstoneLineageResult,
+  CatstoneMultipleMethodsResult,
+  CatstoneStep,
+  State,
 };
