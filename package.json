@@ -34,7 +34,7 @@
     "savefile.js": "0.1.0"
   },
   "devDependencies": {
-    "@gameroman/config": "0.2.6",
+    "@gameroman/config": "0.2.8",
     "@infinite-craft/dom-types": "0.0.4",
     "@savefile/fixtures": "0.0.1",
     "@types/bun": "1.3.14",
